@@ -9,7 +9,7 @@ const typeDefs = gql`
         transactions: [Transaction]
         createdAt: String
     }
-    
+
     # Transaction typedef
     type Transaction {
         _id: ID!
@@ -28,13 +28,13 @@ const typeDefs = gql`
         type: String!
         description: String
     }
-    
+
     # Auth for login response
     type Auth {
         token: String!
         user: User
     }
-    
+
     # Queries for fetching data
     type Query {
         # Fetch a single user by ID
@@ -43,7 +43,7 @@ const typeDefs = gql`
         # Fetch all transactions for a user
         getTransactions(userId: ID!): [Transaction]
 
-        Fetch all categories (or filter by type)
+        # Fetch all categories (or filter by type)
         getCategories(type: String): [Category]
     }
 
@@ -70,15 +70,11 @@ const typeDefs = gql`
             date: String
             description: String
         ): Transaction
-        
+
         deleteTransaction(id: ID!): Transaction
 
         # Category management
-        addCategory(
-            name: String!
-            type: String!
-            description: String
-        ): Category
+        addCategory(name: String!, type: String!, description: String): Category
         deleteCategory(id: ID!): Category
     }
 `;

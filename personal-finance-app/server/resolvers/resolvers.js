@@ -109,7 +109,7 @@ const resolvers = {
                     $push: { transactions: transaction._id },
                 });
 
-                return transaction.populate("category"); //Return the transaction with the category populated
+                return await transaction.populate("category"); //Return the transaction with the category populated
             } catch (err) {
                 throw new Error("Unable to add transaction");
             }
