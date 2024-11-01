@@ -1,9 +1,10 @@
-const User = require("./models/User");
-const Transaction = require("./models/Transaction");
-const Category = require("./models/Category");
+const User = require("../models/User");
+const Transaction = require("../models/Transaction");
+const Category = require("../models/Category");
 const { AuthenticationError } = require("apollo-server-express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { getAllByAltText } = require("@testing-library/react");
 
 const resolvers = {
     Query: {
@@ -13,6 +14,15 @@ const resolvers = {
                 return await User.findById(id).populate("transactions");
             } catch (err) {
                 throw new Error("User not found");
+            }
+        },
+
+        // Fetch all users and populate their transactions
+        async getAllUsers() {
+            try {
+                return await User.find().populate("transactions");
+            } catch (err) {
+                throw new Error("Unable to fetch users");
             }
         },
 

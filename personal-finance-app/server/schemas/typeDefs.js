@@ -40,6 +40,9 @@ const typeDefs = gql`
         # Fetch a single user by ID
         getUser(id: ID!): User
 
+        # Fetch all users
+        getAllUsers: [User]
+
         # Fetch all transactions for a user
         getTransactions(userId: ID!): [Transaction]
 
