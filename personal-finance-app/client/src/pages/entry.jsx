@@ -43,8 +43,24 @@ const Entry = () => {
 
 
 //HARDCODE TEST DATA, RMB TO REMOVE
-  const incomeCategories = ['Salary', 'Investment', 'Freelancing'];
-  const expenseCategories = ['Groceries', 'Transportation', 'Dining Out', 'Entertainment', 'Utilities'];
+  const incomeCategories = ['Salary', 'Investment', 'Freelancing', 'Others'];
+  const expenseCategories = [
+    'Rent/Mortgage',
+    'Utilities',
+    'Groceries',
+    'Dining Out',
+    'Transportation',
+    'Healthcare',
+    'Insurance',
+    'Debt Payments',
+    'Education',
+    'Personal Care',
+    'Entertainment',
+    'Clothing',
+    'Savings/Investments',
+    'Gifts/Donations',
+    'Travel/Vacation',
+    'Miscellaneous'];
 
   return (
     <Box
