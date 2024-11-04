@@ -64,9 +64,6 @@ import {
 //               <Text fontWeight="medium" color="gray.700">
 //                 Recent Spending Trend: Increasing
 //               </Text>
-//               <Text fontSize="sm" color="gray.500">
-//                 Watch for overspending
-//               </Text>
 //             </Stack>
 //           </VStack>
 //         </Box>
