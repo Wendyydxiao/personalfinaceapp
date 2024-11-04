@@ -42,7 +42,6 @@ const Entry = () => {
   };
 
 
-//HARDCODE TEST DATA, RMB TO REMOVE
   const incomeCategories = ['Salary', 'Investment', 'Freelancing', 'Others'];
   const expenseCategories = [
     'Rent/Mortgage',
