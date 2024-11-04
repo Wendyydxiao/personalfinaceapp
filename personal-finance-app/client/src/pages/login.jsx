@@ -14,9 +14,11 @@ import {
   Icon,
   Divider,
   Heading,
+  Center,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon, ArrowForwardIcon, CheckCircleIcon, StarIcon } from '@chakra-ui/icons';
 import { Link as ScrollLink, Element } from 'react-scroll';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -31,7 +33,6 @@ const Login = () => {
       bgGradient="linear(to-r, purple.500, blue.500)"
       p={4}
     >
-
       <Box w="full" textAlign="center" py={20} color="white">
         <Heading fontSize="4xl" mb={4}>Welcome to Your Personal Finance App</Heading>
         <Text fontSize="lg" mb={6}>Track, manage, and optimize your finances effortlessly.</Text>
@@ -99,15 +100,21 @@ const Login = () => {
                 </InputRightElement>
               </InputGroup>
             </FormControl>
-            
-            <Flex justify="space-between" mt={4}>
-              <Button colorScheme="blue" variant="outline" w="48%">
+
+            <Center mt={4}>
+              <Button colorScheme="purple" w="50%">
                 Log In
               </Button>
-              <Button colorScheme="purple" w="48%">
-                Sign Up
-              </Button>
-            </Flex>
+            </Center>
+
+            <Text textAlign="center" mt={4}>
+              Don’t have an account?{' '}
+              <Link to="/signup">
+                <Button colorScheme="purple" variant="link">
+                  Sign Up
+                </Button>
+              </Link>
+            </Text>
           </Stack>
         </Box>
       </Element>
@@ -116,3 +123,4 @@ const Login = () => {
 };
 
 export default Login;
+
