@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const path = require("path");
 const typeDefs = require("./schemas/typeDefs");
-const resolvers = require("./resolvers");
+const resolvers = require("./resolvers/resolvers");
 const { verifyToken } = require("./utils/auth");
 
 dotenv.config();
