@@ -13,7 +13,7 @@
   "dependencies": {
     "@apollo/client": "^3.7.15",
     "@chakra-ui/icons": "^2.2.4",
-    "@chakra-ui/react": "^3.0.2",
+    "@chakra-ui/react": "^2.10.3",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@stripe/stripe-js": "^1.54.0",
@@ -27,6 +27,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.2",
+    "react-scroll": "^1.9.0",
     "vitest": "^1.4.0"
   },
   "devDependencies": {
