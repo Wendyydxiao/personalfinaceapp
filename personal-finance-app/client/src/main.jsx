@@ -7,7 +7,7 @@ import Login from './pages/login';
 import Signup from './pages/signup';
 // import Dashboard from './pages/dashboard';
 import Entry from './pages/entry';
-// import Profile from './pages/Profile';
+import Profile from './pages/profile';
 
 const router = createBrowserRouter([
   {
@@ -18,7 +18,7 @@ const router = createBrowserRouter([
       { path: '/signup', element: <Signup /> },
       // { path: '/dashboard', element: <Dashboard /> },
       { path: '/entry', element: <Entry /> },
-      // { path: '/profile', element: <Profile /> }
+      { path: '/profile', element: <Profile /> }
     ]
   }
 ]);
