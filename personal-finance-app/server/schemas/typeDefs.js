@@ -52,8 +52,8 @@ const typeDefs = gql`
 
     # Mutations for creating, updating, and deleting data
     type Mutation {
-        # User registration and login
-        register(username: String!, email: String!, password: String!): Auth
+        # User signup and login
+        signup(username: String!, email: String!, password: String!): Auth
         login(email: String!, password: String!): Auth
 
         # Transaction management

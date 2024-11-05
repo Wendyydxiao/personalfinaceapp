@@ -48,7 +48,7 @@ const resolvers = {
 
     Mutation: {
         // Register a new user, hashing their password and generating a JWT
-        async register(_, { username, email, password }) {
+        async signup(_, { username, email, password }) {
             // Check if user already exists by email
             const existingUser = await User.findOne({ email });
             if (existingUser) {
