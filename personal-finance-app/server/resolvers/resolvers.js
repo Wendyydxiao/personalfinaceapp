@@ -1,17 +1,25 @@
+// server/resolvers/resolvers.js
+
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const Category = require("../models/Category");
-const { AuthenticationError } = require("apollo-server-express");
-const jwt = require("jsonwebtoken");
+const {
+    AuthenticationError,
+    UserInputError,
+} = require("apollo-server-express");
+const { signToken } = require("../utils/auth");
 const bcrypt = require("bcrypt");
-const { getAllByAltText } = require("@testing-library/react");
 
 const resolvers = {
     Query: {
         // Fetch a single user by ID and populate their transactions
         async getUser(_, { id }) {
             try {
-                return await User.findById(id).populate("transactions");
+                const user = await User.findById(id).populate("transactions");
+                if (!user) {
+                    throw new Error("User not found");
+                }
+                return user;
             } catch (err) {
                 throw new Error("User not found");
             }
@@ -49,52 +57,53 @@ const resolvers = {
     Mutation: {
         // Register a new user, hashing their password and generating a JWT
         async signup(_, { username, email, password }) {
-            // Check if user already exists by email
-            const existingUser = await User.findOne({ email });
-            if (existingUser) {
-                throw new Error("Email already in use");
+            try {
+                // Check if user already exists by email
+                const existingUser = await User.findOne({ email });
+                if (existingUser) {
+                    throw new UserInputError("Email already in use");
+                }
+
+                // Create new user (password will be hashed by the pre-save middleware)
+                const user = await User.create({
+                    username,
+                    email,
+                    password,
+                    createdAt: new Date().toISOString(),
+                });
+
+                // Generate JWT for the new user
+                const token = signToken(user);
+                return { token, user }; // Return the user data and JWT
+            } catch (err) {
+                throw new Error("Unable to create user");
             }
-
-            // Hash password
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // Create new user and save it to the db
-            const user = await User.create({
-                username,
-                email,
-                password: hashedPassword,
-                createdAt: new Date().toISOString(),
-            });
-
-            // Generate JWT for the new user
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-                expiresIn: "1h",
-            });
-            return { token, user }; //Return the user data and JWT
         },
 
         // Authenticate a user by providing their email and password, and generate a JWT
         async login(_, { email, password }) {
-            // Check if a user with the provided email exists
-            const user = await User.findOne({ email });
-            if (!user) {
-                throw new AuthenticationError("User not found");
-            }
+            try {
+                // Check if a user with the provided email exists
+                const user = await User.findOne({ email });
+                if (!user) {
+                    throw new AuthenticationError("Invalid email or password");
+                }
 
-            //Validate the password against the stored hash
-            const isValidPassword = await bcrypt.compare(
-                password,
-                user.password
-            );
-            if (!isValidPassword) {
-                throw new AuthenticationError("Incorrect password");
-            }
+                // Validate the password against the stored hash
+                const isValidPassword = await bcrypt.compare(
+                    password,
+                    user.password
+                );
+                if (!isValidPassword) {
+                    throw new AuthenticationError("Invalid email or password");
+                }
 
-            // Generate a JWT token for the authenticated user
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-                expiresIn: "1h",
-            });
-            return { token, user }; //Return the token and user data
+                // Generate a JWT token for the authenticated user
+                const token = signToken(user);
+                return { token, user }; // Return the token and user data
+            } catch (err) {
+                throw new Error("Unable to login");
+            }
         },
 
         // Add a new transaction for a user, linking it to the specified category
@@ -119,7 +128,7 @@ const resolvers = {
                     $push: { transactions: transaction._id },
                 });
 
-                return await transaction.populate("category"); //Return the transaction with the category populated
+                return await transaction.populate("category"); // Return the transaction with the category populated
             } catch (err) {
                 throw new Error("Unable to add transaction");
             }
@@ -140,10 +149,10 @@ const resolvers = {
             };
 
             try {
-                //Find the transaction by ID and apply the updates, returning the updated transaction
+                // Find the transaction by ID and apply the updates, returning the updated transaction
                 return await Transaction.findByIdAndUpdate(id, updateData, {
                     new: true,
-                }).populate("category"); //Populate the category field
+                }).populate("category"); // Populate the category field
             } catch (err) {
                 throw new Error("Unable to update transaction");
             }
@@ -160,13 +169,13 @@ const resolvers = {
                 await User.findByIdAndUpdate(transaction.userId, {
                     $pull: { transactions: id },
                 });
-                return transaction; //Return the deleted transaction
+                return transaction; // Return the deleted transaction
             } catch (err) {
                 throw new Error("Unable to delete transaction");
             }
         },
 
-        // Add a new catefory with a specified name, type and description
+        // Add a new category with a specified name, type, and description
         async addCategory(_, { name, type, description }) {
             try {
                 // Create and save the new category
@@ -176,7 +185,7 @@ const resolvers = {
                     description,
                 });
                 await category.save();
-                return category; //Return the newly created category
+                return category; // Return the newly created category
             } catch (err) {
                 throw new Error("Unable to add category");
             }
@@ -188,7 +197,7 @@ const resolvers = {
                 // Find and delete the category by ID
                 const category = await Category.findByIdAndDelete(id);
                 if (!category) throw new Error("Category not found");
-                return category; //Return the deleted category
+                return category; // Return the deleted category
             } catch (err) {
                 throw new Error("Unable to delete category");
             }
