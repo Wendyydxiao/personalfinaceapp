@@ -10,33 +10,65 @@ import {
   Heading,
   Center,
   Stack,
+  Alert,
+  AlertIcon,
+  Spinner,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_USER_PROFILE } from '../utils/queries';
+// import { UPDATE_PASSWORD } from '../utils/mutations';
+import AuthService from '../utils/auth';
 
 const Profile = () => {
-  const navigate = useNavigate();
-  const [userData, setUserData] = useState([]);
+  const { data, loading, error } = useQuery(GET_USER_PROFILE);
+  // const [updatePassword] = useMutation(UPDATE_PASSWORD);
+  const [passwordData, setPasswordData] = useState({     
+    newPassword: '',
+    confirmPassword: '', });
 
-  const handleInputChange = (e) => {
+  const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setUserData((prevData) => ({
-      ...prevData,
+    setPasswordData ({
+      ...passwordData,
       [name]: value,
-    }));
+    });
   };
 
-  const handleSaveChanges = () => {
-    console.log('Password updated:', userData.password);
-  };
+  // const handleUpdatePassword = async (e) => {
+  //   e.preventDefault();
+
+  //   if (passwordData.newPassword !== passwordData.confirmPassword) {
+  //     setErrorMessage("Passwords do not match.");
+  //     return;
+  //   }
+  //   try {
+  //     await updatePassword({
+  //       variables: { newPassword: passwordData.newPassword },
+  //     });
+  //     alert("Password updated successfully");
+  //     setPasswordData({ newPassword: '', confirmPassword: '' });
+  //   } catch (err) {
+  //     console.error("Password update error:", err);
+  //   }
+  // };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
+    AuthService.logout();
   };
 
   const redirectToStripe = () => {
     window.location.href = 'https://stripe.com'; //UPDATE THIS URL
   };
+
+  if (loading) return <Spinner size="xl" />;
+  if (error) return (
+    <Alert status="error">
+      <AlertIcon />
+      Error loading profile information
+    </Alert>
+  );
+
+  const { name, email } = data.userProfile;
 
   return (
     <Center minH="100vh" bgGradient="linear(to-r, purple.500, blue.500)" p={4}>
@@ -58,7 +90,7 @@ const Profile = () => {
             <FormLabel>Name</FormLabel>
             <Input
               type="text"
-              value={userData.name}
+              value={name}
               isReadOnly
               _focus={{ boxShadow: 'none' }}
               _hover={{ cursor: 'not-allowed' }}
@@ -69,7 +101,7 @@ const Profile = () => {
             <FormLabel>Email</FormLabel>
             <Input
               type="email"
-              value={userData.email}
+              value={email}
               isReadOnly
               _focus={{ boxShadow: 'none' }}
               _hover={{ cursor: 'not-allowed' }}
@@ -83,8 +115,8 @@ const Profile = () => {
               type="password"
               placeholder="Enter new password"
               name="password"
-              value={userData.password}
-              onChange={handleInputChange}
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
             />
           </FormControl>
 
@@ -94,8 +126,8 @@ const Profile = () => {
               type="password"
               placeholder="Confirm new password"
               name="confirmPassword"
-              value={userData.confirmPassword}
-              onChange={handleInputChange}
+              value={passwordData.confirmPassword}
+              onChange={handlePasswordChange}
             />
           </FormControl>
 
@@ -129,7 +161,7 @@ const Profile = () => {
             </Button>
           </Box>
 
-          <Button colorScheme="purple" onClick={handleSaveChanges} width="full">
+          <Button colorScheme="purple" onClick={handleUpdatePassword} width="full">
             Save Changes
           </Button>
 

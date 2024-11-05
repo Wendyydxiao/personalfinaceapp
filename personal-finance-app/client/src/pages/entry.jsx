@@ -11,13 +11,18 @@ import {
   Heading,
   IconButton,
   Select,
+  Spinner,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_USER_ENTRIES } from '../utils/queries';
+import { ADD_ENTRY,DELETE_ENTRY } from '../utils/mutations';
 
 const Entry = () => {
-  const [expenses, setExpenses] = useState([]);
 
-  const [newExpense, setNewExpense] = useState({
+  const [newEntry, setNewEntry] = useState({
     type: 'Expense',
     category: '',
     amount: '',
@@ -25,21 +30,37 @@ const Entry = () => {
     notes: '',
   });
 
+  const { data, loading, error, refetch } = useQuery(GET_USER_ENTRIES);
+  const [addEntry] = useMutation(ADD_ENTRY);
+  const [deleteEntry] = useMutation(DELETE_ENTRY);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewExpense({ ...newExpense, [name]: value });
+    setNewEntry({ ...newEntry, [name]: value });
   };
 
-  const handleAddExpense = () => {
-    const newEntry = { ...newExpense, id: Date.now() };
-    setExpenses([...expenses, newEntry]);
-    setNewExpense({ type: 'Expense', category: '', amount: '', date: '', notes: '' });
+  const handleAddEntry = async() => {
+    try {
+      await addEntry({
+        variables: { ...newEntry },
+      });
+      setNewEntry({ type: 'Expense', category: '', amount: '', date: '', notes: '' });
+      refetch();
+    } catch (err) {
+      console.error("Error adding transcation:", err);
+    }
   };
 
 
-  const handleDeleteExpense = (id) => {
-    setExpenses(expenses.filter((expense) => expense.id !== id));
+  const handleDeleteEntry = async(_id) => {
+    try {
+      await deleteEntry({ variables: { _id } });
+      refetch();
+    } catch (err) {
+      console.error("Error deleting transcation:", err);
+    }
   };
+
 
 
   const incomeCategories = ['Salary', 'Investment', 'Freelancing', 'Others'];
@@ -60,6 +81,15 @@ const Entry = () => {
     'Gifts/Donations',
     'Travel/Vacation',
     'Miscellaneous'];
+
+    if (loading) return <Spinner size="xl" />;
+    if (error) return (
+      <Alert status="error">
+        <AlertIcon />
+        Error fetching entries
+      </Alert>
+    );
+
 
   return (
     <Box
@@ -87,7 +117,7 @@ const Entry = () => {
             <FormLabel>Entry Type</FormLabel>
             <Select
               name="type"
-              value={newExpense.type}
+              value={newEntry.type}
               onChange={handleInputChange}
             >
               <option value="Income">Income</option>
@@ -100,10 +130,10 @@ const Entry = () => {
             <Select
               placeholder="Select category"
               name="category"
-              value={newExpense.category}
+              value={newEntry.category}
               onChange={handleInputChange}
             >
-              {(newExpense.type === 'Income' ? incomeCategories : expenseCategories).map((category) => (
+              {(newEntry.type === 'Income' ? incomeCategories : expenseCategories).map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -117,7 +147,7 @@ const Entry = () => {
               type="number"
               placeholder="Enter amount"
               name="amount"
-              value={newExpense.amount}
+              value={newEntry.amount}
               onChange={handleInputChange}
             />
           </FormControl>
@@ -127,7 +157,7 @@ const Entry = () => {
             <Input
               type="date"
               name="date"
-              value={newExpense.date}
+              value={newEntry.date}
               onChange={handleInputChange}
             />
           </FormControl>
@@ -137,14 +167,14 @@ const Entry = () => {
             <Input
               type="text"
               placeholder="Optional notes"
-              name="notes"
-              value={newExpense.notes}
+              name="description"
+              value={newEntry.description}
               onChange={handleInputChange}
             />
           </FormControl>
 
-          <Button colorScheme="purple" onClick={handleAddExpense} width="full">
-            {newExpense.id ? 'Update Entry' : 'Add Entry'}
+          <Button colorScheme="purple" onClick={handleAddEntry} width="full">
+            {newEntry.id ? 'Update Entry' : 'Add Entry'}
           </Button>
         </VStack>
       </Box>
@@ -163,11 +193,11 @@ const Entry = () => {
           Your Entries
         </Heading>
 
-        {expenses.length > 0 ? (
+        {data?.userEntries?.length > 0 ? (
           <VStack spacing={4} align="stretch">
-            {expenses.map((expense) => (
+            {data.userEntries.map((entry) => (
               <Box
-                key={expense.id}
+                key={entry._id}
                 borderWidth="1px"
                 borderRadius="lg"
                 p={4}
@@ -175,12 +205,12 @@ const Entry = () => {
               >
                 <HStack justify="space-between">
                   <Box>
-                    <Text fontWeight="bold">{expense.type}: {expense.category}</Text>
+                    <Text fontWeight="bold">{entry.type}: {entry.category}</Text>
                     <Text fontSize="sm" color="gray.600">
-                      ${expense.amount} on {expense.date}
+                      ${entry.amount} on {new Date(entry.date).toLocaleDateString()}
                     </Text>
                     <Text fontSize="sm" color="gray.500">
-                      {expense.notes}
+                      {entry.description || 'N/A'}
                     </Text>
                   </Box>
                   <HStack>
@@ -188,7 +218,7 @@ const Entry = () => {
                     <IconButton
                       icon={<DeleteIcon />}
                       colorScheme="red"
-                      onClick={() => handleDeleteExpense(expense.id)}
+                      onClick={() => handleDeleteEntry(entry._id)}
                       aria-label="Delete entry"
                     />
                   </HStack>
