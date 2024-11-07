@@ -14,7 +14,7 @@ import {
   AlertIcon,
   Spinner,
 } from '@chakra-ui/react';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { GET_USER_PROFILE } from '../utils/queries';
 import AuthService from '../utils/auth';
 
@@ -32,6 +32,24 @@ const Profile = () => {
       [name]: value,
     });
   };
+
+  // const handleUpdatePassword = async (e) => {
+  //   e.preventDefault();
+  //   if (passwordData.newPassword !== passwordData.confirmPassword) {
+  //     setErrorMessage("Passwords do not match.");
+  //     return;
+  //   }
+  //   try {
+  //     await updatePassword({
+  //       variables: { newPassword: passwordData.newPassword },
+  //     });
+  //     alert("Password updated successfully");
+  //     setPasswordData({ newPassword: '', confirmPassword: '' });
+  //   } catch (err) {
+  //     console.error("Password update error:", err);
+  //   }
+  // };
+
 
   const handleLogout = () => {
     AuthService.logout();
