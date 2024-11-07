@@ -15,7 +15,7 @@ export const GET_USER_ENTRIES = gql`
 
 export const GET_USER_PROFILE = gql`
   query GetUserProfile {
-    userProfile {
+    getUser {
       _id
       username
       email

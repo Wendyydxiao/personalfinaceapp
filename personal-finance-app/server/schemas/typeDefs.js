@@ -62,8 +62,8 @@ const typeDefs = gql`
 
     # Queries for fetching data
     type Query {
-        # Fetch a single user by ID
-        getUser(id: ID!): User
+        # Fetch the authenticated user
+        getUser: User
 
         # Fetch all users
         getAllUsers: [User]
