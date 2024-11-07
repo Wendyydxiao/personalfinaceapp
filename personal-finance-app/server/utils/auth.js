@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 // Define the secret and expiration for the JWT
-const secret = process.env.JWT_SECRET || "mysecretsshhhhh";
+const secret = process.env.JWT_SECRET || "your_jwt_secret_key";
 const expiration = "1h";
 
 // Function to sign a token for a user
@@ -24,14 +24,15 @@ function authMiddleware({ req }) {
     }
 
     if (!token) {
-        return req;
+        return req; // No token provided
     }
 
     try {
         const decoded = jwt.verify(token, secret);
-        req.user = decoded;
-    } catch {
-        console.log("Invalid token");
+        req.user = decoded; // Attach the decoded user data to req.user
+    } catch (err) {
+        console.error("Invalid token:", err);
+        // Optionally, you could modify this to return an error
     }
 
     return req;
@@ -43,7 +44,7 @@ function verifyToken(token) {
         return jwt.verify(token, secret); // Will return the decoded token if valid
     } catch (err) {
         console.error("Token verification failed:", err);
-        return null;
+        return null; // Return null if verification fails
     }
 }
 
