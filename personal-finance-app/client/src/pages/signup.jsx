@@ -11,9 +11,9 @@ import {
   Heading,
   Center,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { SIGNUP_USER } from '../utils/mutations';
+import AuthService from '../utils/auth';
 
 function Signup() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ function Signup() {
 
   const [signupUser, { loading }] = useMutation(SIGNUP_USER, {
     onCompleted: (data) => {
-      localStorage.setItem('token', data.signup.token);
+      AuthService.login(data.signup.token);
       navigate('/dashboard');
     },
     onError: (error) => {

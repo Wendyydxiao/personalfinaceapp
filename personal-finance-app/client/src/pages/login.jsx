@@ -19,10 +19,34 @@ import {
 import { ViewIcon, ViewOffIcon, ArrowForwardIcon, CheckCircleIcon, StarIcon } from '@chakra-ui/icons';
 import { Link as ScrollLink, Element } from 'react-scroll';
 import { Link } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { LOGIN_USER } from '../utils/mutations';
+import AuthService from '../utils/auth';
 
 const Login = () => {
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [loginUser, { error }] = useMutation(LOGIN_USER);
+  
   const handlePasswordVisibility = () => setShowPassword(!showPassword);
+
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setLoginData({ ...loginData, [name]: value });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await loginUser({
+        variables: { ...loginData },
+      });
+      AuthService.login(data.login.token);
+    } catch (err) {
+      console.error("Login error:", err);
+    }
+  };
 
   return (
     <Flex
@@ -77,45 +101,63 @@ const Login = () => {
 
           <Divider mb={6} />
 
-          <Stack spacing={5}>
-            <FormControl id="email">
-              <FormLabel>Email</FormLabel>
-              <Input type="email" placeholder="name@example.com" />
-            </FormControl>
-            
-            <FormControl id="password">
-              <FormLabel>Password</FormLabel>
-              <InputGroup>
+          <form onSubmit={handleLogin}>
+            <Stack spacing={5}>
+              <FormControl id="email">
+                <FormLabel>Email</FormLabel>
                 <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  type="email"
+                  placeholder="name@example.com"
+                  name="email"
+                  value={loginData.email}
+                  onChange={handleInputChange}
                 />
-                <InputRightElement>
-                  <Button
-                    variant="ghost"
-                    onClick={handlePasswordVisibility}
-                  >
-                    {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
+              </FormControl>
+              
+              <FormControl id="password">
+                <FormLabel>Password</FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    name="password"
+                    value={loginData.password}
+                    onChange={handleInputChange}
+                  />
+                  <InputRightElement>
+                    <Button
+                      variant="ghost"
+                      onClick={handlePasswordVisibility}
+                    >
+                      {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
 
-            <Center mt={4}>
-              <Button colorScheme="purple" w="50%">
-                Log In
-              </Button>
-            </Center>
+              {error && (
+                <Alert status="error">
+                  <AlertIcon />
+                  Invalid login credentials
+                </Alert>
+              )}
 
-            <Text textAlign="center" mt={4}>
-              Don’t have an account?{' '}
-              <Link to="/signup">
-                <Button colorScheme="purple" variant="link">
-                  Sign Up
+              <Center mt={4}>
+                <Button colorScheme="purple" type="submit" w="50%">
+                  Log In
                 </Button>
-              </Link>
-            </Text>
-          </Stack>
+              </Center>
+
+              <Text textAlign="center" mt={4}>
+                Don’t have an account?{' '}
+                <Link to="/signup">
+                  <Button colorScheme="purple" variant="link">
+                    Sign Up
+                  </Button>
+                </Link>
+              </Text>
+            </Stack>
+          </form>
         </Box>
       </Element>
     </Flex>
