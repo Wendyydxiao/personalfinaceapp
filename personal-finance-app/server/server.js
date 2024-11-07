@@ -1,4 +1,5 @@
 // server.js
+require("dotenv").config();
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 const mongoose = require("mongoose");
@@ -6,6 +7,7 @@ const path = require("path");
 const typeDefs = require("./schemas/typeDefs");
 const resolvers = require("./resolvers/resolvers");
 const { verifyToken } = require("./utils/auth");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Import and configure Stripe
 const cors = require("cors");
 
 // Temporary hard-coded values for debugging purposes
