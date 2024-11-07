@@ -14,61 +14,61 @@ import {
   AlertIcon,
   Spinner,
 } from '@chakra-ui/react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { GET_USER_PROFILE } from '../utils/queries';
-// import { UPDATE_PASSWORD } from '../utils/mutations';
 import AuthService from '../utils/auth';
 
 const Profile = () => {
   const { data, loading, error } = useQuery(GET_USER_PROFILE);
-  // const [updatePassword] = useMutation(UPDATE_PASSWORD);
-  const [passwordData, setPasswordData] = useState({     
+  const [passwordData, setPasswordData] = useState({
     newPassword: '',
-    confirmPassword: '', });
+    confirmPassword: '',
+  });
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordData ({
+    setPasswordData({
       ...passwordData,
       [name]: value,
     });
   };
 
-  // const handleUpdatePassword = async (e) => {
-  //   e.preventDefault();
-
-  //   if (passwordData.newPassword !== passwordData.confirmPassword) {
-  //     setErrorMessage("Passwords do not match.");
-  //     return;
-  //   }
-  //   try {
-  //     await updatePassword({
-  //       variables: { newPassword: passwordData.newPassword },
-  //     });
-  //     alert("Password updated successfully");
-  //     setPasswordData({ newPassword: '', confirmPassword: '' });
-  //   } catch (err) {
-  //     console.error("Password update error:", err);
-  //   }
-  // };
-
   const handleLogout = () => {
     AuthService.logout();
   };
 
-  const redirectToStripe = () => {
-    window.location.href = 'https://stripe.com'; //UPDATE THIS URL
+  const redirectToStripe = async () => {
+    try {
+      const response = await fetch('/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const session = await response.json();
+
+      if (session.id) {
+        // Redirect to Stripe's checkout page
+        window.location.href = session.url;
+      } else {
+        console.error('Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+    }
   };
 
   if (loading) return <Spinner size="xl" />;
-  if (error) return (
-    <Alert status="error">
-      <AlertIcon />
-      Error loading profile information
-    </Alert>
-  );
+  if (error)
+    return (
+      <Alert status="error">
+        <AlertIcon />
+        Error loading profile information
+      </Alert>
+    );
 
-  const { name, email } = data.userProfile;
+  const { username, email } = data.getUser;
 
   return (
     <Center minH="100vh" bgGradient="linear(to-r, purple.500, blue.500)" p={4}>
@@ -90,7 +90,7 @@ const Profile = () => {
             <FormLabel>Name</FormLabel>
             <Input
               type="text"
-              value={name}
+              value={username}
               isReadOnly
               _focus={{ boxShadow: 'none' }}
               _hover={{ cursor: 'not-allowed' }}
@@ -108,13 +108,12 @@ const Profile = () => {
             />
           </FormControl>
 
-
           <FormControl id="password">
             <FormLabel>Update Password</FormLabel>
             <Input
               type="password"
               placeholder="Enter new password"
-              name="password"
+              name="newPassword"
               value={passwordData.newPassword}
               onChange={handlePasswordChange}
             />
@@ -132,7 +131,7 @@ const Profile = () => {
           </FormControl>
 
           <Box
-            bgColor = "orange.400"
+            bgColor="orange.400"
             borderRadius="lg"
             p={6}
             color="white"
@@ -150,7 +149,7 @@ const Profile = () => {
                 </Text>
               </Box>
             </Stack>
-          <Button
+            <Button
               colorScheme="green"
               bg="green.400"
               mt={4}
@@ -161,11 +160,17 @@ const Profile = () => {
             </Button>
           </Box>
 
-          <Button colorScheme="purple" onClick={handleUpdatePassword} width="full">
+          <Button colorScheme="purple" width="full">
             Save Changes
           </Button>
 
-          <Button colorScheme="purple"  variant="outline" onClick={handleLogout} width="full" mt={2}>
+          <Button
+            colorScheme="purple"
+            variant="outline"
+            onClick={handleLogout}
+            width="full"
+            mt={2}
+          >
             Log Out
           </Button>
         </VStack>
