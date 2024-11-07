@@ -1,14 +1,14 @@
+const dotenv = require("dotenv");
+dotenv.config(); // Load environment variables at the very beginning
+
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
-const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const path = require("path");
 const typeDefs = require("./schemas/typeDefs");
 const resolvers = require("./resolvers/resolvers");
 const { verifyToken } = require("./utils/auth");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Import and configure Stripe
-
-dotenv.config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Import and configure Stripe after dotenv
 
 const app = express();
 const PORT = process.env.PORT || 4000;
