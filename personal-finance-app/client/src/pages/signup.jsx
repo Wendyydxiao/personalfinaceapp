@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Box, Flex, Heading, Text, Button } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
@@ -5,12 +6,14 @@ import { useMutation } from "@apollo/client";
 import { SIGNUP_USER } from "../utils/mutations";
 import SignupForm from "../components/SignupForm";
 
+
 function Signup() {
     const navigate = useNavigate();
     const [username, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+
 
     const [signupUser, { loading }] = useMutation(SIGNUP_USER, {
         onCompleted: (data) => {
