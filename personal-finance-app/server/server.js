@@ -6,7 +6,7 @@ const path = require("path");
 const typeDefs = require("./schemas/typeDefs");
 const resolvers = require("./resolvers/resolvers");
 const { verifyToken } = require("./utils/auth");
-const cors = require("cors"); //
+const cors = require("cors");
 
 // Temporary hard-coded values for debugging purposes
 const JWT_SECRET = "your_jwt_secret_key"; // Replace this with your secret key
