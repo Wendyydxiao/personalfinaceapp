@@ -35,6 +35,31 @@ const typeDefs = gql`
         user: User
     }
 
+    # Input types for better reusability
+    input SignupInput {
+        username: String!
+        email: String!
+        password: String!
+    }
+
+    input TransactionInput {
+        userId: ID!
+        type: String!
+        amount: Float!
+        categoryId: ID!
+        date: String
+        description: String
+    }
+
+    input UpdateTransactionInput {
+        id: ID!
+        type: String
+        amount: Float
+        categoryId: ID
+        date: String
+        description: String
+    }
+
     # Queries for fetching data
     type Query {
         # Fetch a single user by ID
@@ -57,23 +82,8 @@ const typeDefs = gql`
         login(email: String!, password: String!): Auth
 
         # Transaction management
-        addTransaction(
-            userId: ID!
-            type: String!
-            amount: Float!
-            category: ID!
-            date: String
-            description: String
-        ): Transaction
-        updateTransaction(
-            id: ID!
-            type: String
-            amount: Float
-            categoryId: ID
-            date: String
-            description: String
-        ): Transaction
-
+        addTransaction(input: TransactionInput!): Transaction
+        updateTransaction(input: UpdateTransactionInput!): Transaction
         deleteTransaction(id: ID!): Transaction
 
         # Category management
