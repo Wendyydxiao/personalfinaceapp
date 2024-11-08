@@ -15,11 +15,11 @@ const PORT = 4000; // Port for running the server
 const app = express();
 
 // CORS configuration
-const corsOptions = {
-    origin: "http://localhost:3000", // Replace with your front-end URL
-    credentials: true,
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//     origin: "*", // Replace with your front-end URL
+//     credentials: true,
+// };
+// app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -87,7 +87,7 @@ async function startApolloServer() {
         console.log("Apollo Server started successfully");
         server.applyMiddleware({
             app,
-            cors: corsOptions,
+            // cors: corsOptions,
         });
         console.log("Apollo middleware applied successfully");
 

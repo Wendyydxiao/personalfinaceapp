@@ -1,11 +1,10 @@
 import {gql} from '@apollo/client';
 
 export const GET_USER_ENTRIES = gql`
-  query GetUserEntries {
-    userEntries {
+  query getTranscations ($userId: ID!) {
+    getTransactions(userId: $userId) {
       _id
       type
-      category
       amount
       date
       description

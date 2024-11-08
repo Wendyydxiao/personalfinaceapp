@@ -60,9 +60,12 @@ const Login = () => {
         }
 
         try {
+            const { data } =             
             await loginUser({
                 variables: { email, password },
             });
+            console.log(JSON.stringify(data));
+            localStorage.setItem("user", JSON.stringify(data.login));
         } catch (err) {
             console.error("Login error:", err);
         }
