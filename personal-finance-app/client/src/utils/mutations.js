@@ -34,11 +34,6 @@ export const ADD_ENTRY = gql`
             amount
             date
             description
-            category {
-                _id
-                name
-                type
-            }
         }
     }
 `;
