@@ -60,8 +60,7 @@ const Login = () => {
         }
 
         try {
-            const { data } =             
-            await loginUser({
+            const { data } = await loginUser({
                 variables: { email, password },
             });
             console.log(JSON.stringify(data));
