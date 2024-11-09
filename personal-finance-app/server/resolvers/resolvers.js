@@ -6,17 +6,17 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 // Hardcoded JWT secret key for now
-const JWT_SECRET = "your_jwt_secret_key";
+const JWT_SECRET = "abc123";
 
 const resolvers = {
     Query: {
-        // Fetch a single user by ID and populate their transactions
-        async getUser(_, { id }, context) {
+        // Fetch the authenticated user's profile
+        async getUser(_, __, context) {
             if (!context.user) {
                 throw new AuthenticationError("Not authenticated");
             }
             try {
-                return await User.findById(id).populate("transactions");
+                return await User.findById(context.user.id).populate("transactions");
             } catch (err) {
                 throw new Error(`User not found: ${err.message}`);
             }
@@ -59,7 +59,6 @@ const resolvers = {
 
     Mutation: {
         // Register a new user, hashing their password and generating a JWT
-        // Signup Resolver
         async signup(_, { username, email, password }) {
             try {
                 console.log("Checking if user already exists...");

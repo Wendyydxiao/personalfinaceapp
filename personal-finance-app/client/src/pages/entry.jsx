@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {
   Box,
   Button,
@@ -30,7 +30,16 @@ const Entry = () => {
     notes: '',
   });
 
-  const { data, loading, error, refetch } = useQuery(GET_USER_ENTRIES);
+  // const { data, loading, error, refetch } = useQuery(GET_USER_ENTRIES);
+  const { data, loading, error, refetch } = useQuery(GET_USER_ENTRIES, {
+    variables: { userId: JSON.parse(localStorage.getItem('user')).user._id},
+  });
+
+  // console.log(JSON.parse(localStorage.getItem('user')).user);
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+
   const [addEntry] = useMutation(ADD_ENTRY);
   const [deleteEntry] = useMutation(DELETE_ENTRY);
 
@@ -42,7 +51,15 @@ const Entry = () => {
   const handleAddEntry = async() => {
     try {
       await addEntry({
-        variables: { ...newEntry },
+        variables: {        
+         input: {
+          type: newEntry.type,
+          amount: parseFloat(newEntry.amount),
+          date: newEntry.date,
+          description: newEntry.notes,
+          category: newEntry.category,
+         },
+        },
       });
       setNewEntry({ type: 'Expense', category: '', amount: '', date: '', notes: '' });
       refetch();
@@ -52,9 +69,9 @@ const Entry = () => {
   };
 
 
-  const handleDeleteEntry = async(_id) => {
+  const handleDeleteEntry = async(id) => {
     try {
-      await deleteEntry({ variables: { _id } });
+      await deleteEntry({ variables: { id } });
       refetch();
     } catch (err) {
       console.error("Error deleting transcation:", err);
@@ -168,7 +185,7 @@ const Entry = () => {
               type="text"
               placeholder="Optional notes"
               name="description"
-              value={newEntry.description}
+              value={newEntry.notes}
               onChange={handleInputChange}
             />
           </FormControl>
@@ -189,13 +206,14 @@ const Entry = () => {
         textAlign="center"
         mx="auto"
       >
-        <Heading fontSize="lg" color="purple.700" mb={6}>
+        <Heading fontSize="lg" color="purple.600" mb={6}>
           Your Entries
         </Heading>
 
-        {data?.userEntries?.length > 0 ? (
+        {/* {(data||[])?.userEntries?.length > 0 ? ( */}
+        {data?.getTransactions?.length > 0 ? (
           <VStack spacing={4} align="stretch">
-            {data.userEntries.map((entry) => (
+            {data.getTransactions.map((entry) => (
               <Box
                 key={entry._id}
                 borderWidth="1px"

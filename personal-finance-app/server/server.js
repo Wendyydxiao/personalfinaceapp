@@ -6,23 +6,23 @@ const mongoose = require("mongoose");
 const path = require("path");
 const typeDefs = require("./schemas/typeDefs");
 const resolvers = require("./resolvers/resolvers");
+const { authMiddleware } = require("./utils/auth");
 const { verifyToken } = require("./utils/auth");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Import and configure Stripe
 const cors = require("cors");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-// Temporary hard-coded values for debugging purposes
-const JWT_SECRET = "your_jwt_secret_key"; // Replace this with your secret key
 const MONGODB_URI = "mongodb://127.0.0.1:27017/mernAppDB"; // Replace with your MongoDB URI
 const PORT = 4000; // Port for running the server
 
 const app = express();
 
 // CORS configuration
-const corsOptions = {
-    origin: "http://localhost:3000", // Replace with your front-end URL
-    credentials: true, // Allow credentials (e.g., cookies, auth headers)
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//     origin: "*", // Replace with your front-end URL
+//     credentials: true,
+// };
+// app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -55,19 +55,16 @@ const server = new ApolloServer({
     },
 });
 
-//Stripe
+// Stripe payment endpoint
 app.post("/create-checkout-session", async (req, res) => {
     try {
-        // Create a Stripe checkout session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: [
                 {
                     price_data: {
                         currency: "aud",
-                        product_data: {
-                            name: "Premium Features",
-                        },
+                        product_data: { name: "Premium Features" },
                         unit_amount: 288, // Amount in cents (e.g., AUD$2.88)
                     },
                     quantity: 1,
@@ -77,7 +74,6 @@ app.post("/create-checkout-session", async (req, res) => {
             success_url: `${req.headers.origin}/success`,
             cancel_url: `${req.headers.origin}/cancel`,
         });
-        // Send session ID to the client
         res.json({ id: session.id });
     } catch (error) {
         console.error("Error creating Stripe session:", error);
@@ -100,7 +96,7 @@ async function startApolloServer() {
         console.log("Apollo Server started successfully");
         server.applyMiddleware({
             app,
-            cors: corsOptions,
+            // cors: corsOptions,
         });
         console.log("Apollo middleware applied successfully");
 

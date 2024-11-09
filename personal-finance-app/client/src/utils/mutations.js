@@ -34,11 +34,6 @@ export const ADD_ENTRY = gql`
             amount
             date
             description
-            category {
-                _id
-                name
-                type
-            }
         }
     }
 `;
@@ -52,10 +47,10 @@ export const DELETE_ENTRY = gql`
 `;
 
 // Placeholder for future mutations - you can add this later as needed
-// export const UPDATE_PASSWORD = gql`
-// mutation UpdatePassword($id: ID!, $oldPassword: String!, $newPassword: String!) {
-//     updatePassword(id: $id, oldPassword: $oldPassword, newPassword: $newPassword) {
-//         message
-//     }
-// }
-// `;
+export const UPDATE_PASSWORD = gql`
+mutation UpdatePassword($id: ID!, $oldPassword: String!, $newPassword: String!) {
+     updatePassword(id: $id, oldPassword: $oldPassword, newPassword: $newPassword) {
+         message
+     }
+     }
+ `;
