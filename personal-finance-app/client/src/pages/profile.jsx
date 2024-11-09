@@ -19,11 +19,20 @@ import { GET_USER_PROFILE } from '../utils/queries';
 import AuthService from '../utils/auth';
 
 const Profile = () => {
-  const { data, loading, error } = useQuery(GET_USER_PROFILE);
+  const { data, loading, error } = useQuery(GET_USER_PROFILE, {
+    context: {
+        headers: {
+            Authorization: `Bearer ${AuthService.getToken()}`, // Retrieve the token here
+        },
+    },
+});
+
+
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
     confirmPassword: '',
   });
+
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
