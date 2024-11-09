@@ -1,4 +1,3 @@
-// server.js
 require("dotenv").config();
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
@@ -6,56 +5,49 @@ const mongoose = require("mongoose");
 const path = require("path");
 const typeDefs = require("./schemas/typeDefs");
 const resolvers = require("./resolvers/resolvers");
-const { authMiddleware } = require("./utils/auth");
-const { verifyToken } = require("./utils/auth");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Import and configure Stripe
-const cors = require("cors");
+const { authMiddleware, verifyToken } = require("./utils/auth");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const cors = require("cors");
 
-const MONGODB_URI = "mongodb://127.0.0.1:27017/mernAppDB"; // Replace with your MongoDB URI
-const PORT = 4000; // Port for running the server
+const MONGODB_URI =
+    process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mernAppDB";
+const PORT = process.env.PORT || 4000;
+
+if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("Missing STRIPE_SECRET_KEY in environment variables.");
+    process.exit(1);
+}
 
 const app = express();
 
-// CORS configuration
-// const corsOptions = {
-//     origin: "*", // Replace with your front-end URL
-//     credentials: true,
-// };
-// app.use(cors(corsOptions));
+// CORS Configuration
+const corsOptions = {
+    origin:
+        process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : "*",
+    credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Serve static assets in production
 if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../client/dist")));
+    const clientBuildPath = path.join(__dirname, "../client/dist");
+    app.use(express.static(clientBuildPath));
     app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+        res.sendFile(path.join(clientBuildPath, "index.html"));
     });
 }
 
 // Initialize Apollo Server
+
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: ({ req }) => {
-        let token = req.headers.authorization || "";
-        if (token.startsWith("Bearer ")) {
-            token = token.slice(7, token.length).trim();
-        }
-        try {
-            console.log("Verifying token:", token);
-            const user = verifyToken(token); // Verify token using the newly added function
-            console.log("Token verification successful:", user);
-            return { user };
-        } catch (error) {
-            console.error("Token verification error:", error);
-            return { user: null };
-        }
-    },
+    context: ({ req }) => authMiddleware({ req }),
 });
 
-// Stripe payment endpoint
+// Stripe Payment Endpoint
 app.post("/create-checkout-session", async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.create({
@@ -65,7 +57,7 @@ app.post("/create-checkout-session", async (req, res) => {
                     price_data: {
                         currency: "aud",
                         product_data: { name: "Premium Features" },
-                        unit_amount: 288, // Amount in cents (e.g., AUD$2.88)
+                        unit_amount: 288, // Amount in cents
                     },
                     quantity: 1,
                 },
@@ -76,12 +68,12 @@ app.post("/create-checkout-session", async (req, res) => {
         });
         res.json({ id: session.id });
     } catch (error) {
-        console.error("Error creating Stripe session:", error);
+        console.error("Error creating Stripe session:", error.message);
         res.status(500).json({ error: "Failed to create Stripe session" });
     }
 });
 
-// Start server and connect to MongoDB
+// Start Apollo Server and MongoDB Connection
 async function startApolloServer() {
     try {
         // Connect to MongoDB
@@ -93,21 +85,17 @@ async function startApolloServer() {
 
         // Start Apollo Server
         await server.start();
-        console.log("Apollo Server started successfully");
-        server.applyMiddleware({
-            app,
-            // cors: corsOptions,
-        });
-        console.log("Apollo middleware applied successfully");
+        server.applyMiddleware({ app });
+        console.log("Apollo Server is ready");
 
-        // Start Express server
+        // Start Express Server
         app.listen(PORT, () =>
             console.log(
-                `Server running at http://localhost:${PORT}${server.graphqlPath}`
+                `🚀 Server is running at http://localhost:${PORT}${server.graphqlPath}`
             )
         );
     } catch (error) {
-        console.error("Error starting server:", error);
+        console.error("Error starting the server:", error.message);
     }
 }
 

@@ -26,7 +26,7 @@ export const SIGNUP_USER = gql`
     }
 `;
 
-export const ADD_ENTRY = gql`
+export const ADD_TRANSACTION = gql`
     mutation AddTransaction($input: TransactionInput!) {
         addTransaction(input: $input) {
             _id
@@ -34,6 +34,10 @@ export const ADD_ENTRY = gql`
             amount
             date
             description
+            category {
+                name
+                type
+            }
         }
     }
 `;
@@ -46,11 +50,29 @@ export const DELETE_ENTRY = gql`
     }
 `;
 
-// Placeholder for future mutations - you can add this later as needed
+export const ADD_CATEGORY = gql`
+    mutation AddCategory($name: String!, $type: String!, $description: String) {
+        addCategory(name: $name, type: $type, description: $description) {
+            _id
+            name
+            type
+            description
+        }
+    }
+`;
+
 export const UPDATE_PASSWORD = gql`
-mutation UpdatePassword($id: ID!, $oldPassword: String!, $newPassword: String!) {
-     updatePassword(id: $id, oldPassword: $oldPassword, newPassword: $newPassword) {
-         message
-     }
-     }
- `;
+    mutation UpdatePassword(
+        $id: ID!
+        $oldPassword: String!
+        $newPassword: String!
+    ) {
+        updatePassword(
+            id: $id
+            oldPassword: $oldPassword
+            newPassword: $newPassword
+        ) {
+            message
+        }
+    }
+`;
