@@ -18,6 +18,38 @@ import { useQuery, useMutation } from "@apollo/client";
 import { GET_CATEGORIES, GET_USER_ENTRIES } from "../utils/queries";
 import { ADD_TRANSACTION, ADD_CATEGORY } from "../utils/mutations";
 
+const DEFAULT_CATEGORIES = {
+    income: [
+        "Salary",
+        "Bonus",
+        "Freelancing",
+        "Investments",
+        "Rental Income",
+        "Business Revenue",
+        "Side Hustles",
+        "Gifts",
+        "Other",
+    ],
+    expense: [
+        "Rent/Mortgage",
+        "Utilities",
+        "Groceries",
+        "Dining Out",
+        "Transportation",
+        "Healthcare",
+        "Insurance",
+        "Debt Payments",
+        "Education",
+        "Personal Care",
+        "Entertainment",
+        "Clothing",
+        "Savings/Investments",
+        "Gifts/Donations",
+        "Travel/Vacation",
+        "Miscellaneous",
+    ],
+};
+
 const Entry = () => {
     const [newEntry, setNewEntry] = useState({
         type: "Expense",
@@ -44,7 +76,11 @@ const Entry = () => {
 
     useEffect(() => {
         if (categoryData?.getCategories) {
-            setCategories(categoryData.getCategories);
+            const userCategories = categoryData.getCategories.map((cat) => ({
+                name: cat.name,
+                type: cat.type,
+            }));
+            setCategories(userCategories);
         }
     }, [categoryData]);
 
@@ -115,6 +151,13 @@ const Entry = () => {
         }
     };
 
+    const filteredCategories = [
+        ...DEFAULT_CATEGORIES[newEntry.type.toLowerCase()],
+        ...categories
+            .filter((cat) => cat.type === newEntry.type.toLowerCase())
+            .map((cat) => cat.name),
+    ];
+
     if (transactionLoading || categoryLoading) return <Spinner size="xl" />;
     if (error)
         return (
@@ -162,19 +205,11 @@ const Entry = () => {
                             value={newEntry.category}
                             onChange={handleInputChange}
                         >
-                            {categories
-                                .filter(
-                                    (cat) =>
-                                        cat.type === newEntry.type.toLowerCase()
-                                )
-                                .map((category) => (
-                                    <option
-                                        key={category._id}
-                                        value={category.name}
-                                    >
-                                        {category.name}
-                                    </option>
-                                ))}
+                            {filteredCategories.map((category, index) => (
+                                <option key={index} value={category}>
+                                    {category}
+                                </option>
+                            ))}
                         </Select>
                         <Input
                             mt={2}

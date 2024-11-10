@@ -99,6 +99,8 @@ const resolvers = {
             const { type, amount, date, description, category } = input;
             try {
                 const normalizedType = type.toLowerCase();
+
+                // Find or create the category
                 let categoryDoc = await Category.findOne({
                     name: category,
                     type: normalizedType,
@@ -109,6 +111,8 @@ const resolvers = {
                         type: normalizedType,
                     });
                 }
+
+                // Create the transaction
                 const transaction = await Transaction.create({
                     userId: context.user.id,
                     type: normalizedType,
@@ -117,9 +121,12 @@ const resolvers = {
                     description,
                     category: categoryDoc._id,
                 });
+
+                // Update the user's transactions
                 await User.findByIdAndUpdate(context.user.id, {
                     $push: { transactions: transaction._id },
                 });
+
                 return transaction.populate("category");
             } catch (err) {
                 throw new Error(`Unable to add transaction: ${err.message}`);
@@ -145,7 +152,24 @@ const resolvers = {
                 throw new AuthenticationError("Not authenticated");
             }
             try {
-                return await Category.create({ name, type, description });
+                const normalizedType = type.toLowerCase();
+
+                // Check if the category already exists
+                let existingCategory = await Category.findOne({
+                    name,
+                    type: normalizedType,
+                });
+                if (existingCategory) {
+                    return existingCategory; // Return the existing category
+                }
+
+                // Create a new category if it doesn't exist
+                const newCategory = await Category.create({
+                    name,
+                    type: normalizedType,
+                    description,
+                });
+                return newCategory;
             } catch (err) {
                 throw new Error(`Unable to add category: ${err.message}`);
             }
