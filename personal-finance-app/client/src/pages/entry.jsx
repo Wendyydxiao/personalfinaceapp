@@ -11,7 +11,9 @@ import {
     Spinner,
     Alert,
     AlertIcon,
+    useToast,
 } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_CATEGORIES, GET_USER_ENTRIES } from "../utils/queries";
 import { ADD_TRANSACTION, ADD_CATEGORY } from "../utils/mutations";
@@ -37,6 +39,8 @@ const Entry = () => {
 
     const [addTransaction] = useMutation(ADD_TRANSACTION);
     const [addCategory] = useMutation(ADD_CATEGORY);
+
+    const toast = useToast(); // For displaying success or error messages
 
     useEffect(() => {
         if (categoryData?.getCategories) {
@@ -79,6 +83,7 @@ const Entry = () => {
                 },
             });
 
+            // Reset form after successful entry
             setNewEntry({
                 type: "Expense",
                 category: "",
@@ -88,8 +93,25 @@ const Entry = () => {
             });
 
             refetch();
+
+            // Show success toast
+            toast({
+                title: "Transaction Added",
+                description: "Your transaction has been successfully added.",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
         } catch (err) {
             console.error("Error adding transaction:", err.message);
+            // Show error toast
+            toast({
+                title: "Error Adding Transaction",
+                description: err.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
         }
     };
 
@@ -207,6 +229,15 @@ const Entry = () => {
                         Add Entry
                     </Button>
                 </VStack>
+
+                {/* Navigation Button */}
+                <Box mt={6}>
+                    <Link to="/dashboard">
+                        <Button colorScheme="teal" width="full">
+                            Back to Dashboard
+                        </Button>
+                    </Link>
+                </Box>
             </Box>
         </Box>
     );

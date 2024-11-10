@@ -62,17 +62,54 @@ export const ADD_CATEGORY = gql`
 `;
 
 export const UPDATE_PASSWORD = gql`
-    mutation UpdatePassword(
-        $id: ID!
-        $oldPassword: String!
-        $newPassword: String!
-    ) {
-        updatePassword(
-            id: $id
-            oldPassword: $oldPassword
-            newPassword: $newPassword
-        ) {
+    mutation UpdatePassword($newPassword: String!) {
+        updatePassword(newPassword: $newPassword) {
             message
+        }
+    }
+`;
+
+export const GET_USER_PROFILE = gql`
+    query GetUserProfile {
+        getUser {
+            _id
+            username
+            email
+            transactions {
+                _id
+                type
+                amount
+                date
+                description
+                category {
+                    name
+                }
+            }
+        }
+    }
+`;
+
+export const GET_USER_ENTRIES = gql`
+    query GetUserEntries {
+        getTransactions {
+            _id
+            type
+            amount
+            date
+            description
+            category {
+                name
+            }
+        }
+    }
+`;
+
+export const GET_CATEGORIES = gql`
+    query GetCategories {
+        getCategories {
+            _id
+            name
+            type
         }
     }
 `;

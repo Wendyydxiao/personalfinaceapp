@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Box, Heading, Spinner, VStack } from "@chakra-ui/react";
+import {
+    Box,
+    Heading,
+    Spinner,
+    VStack,
+    Flex,
+    Divider,
+    Button,
+} from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_USER_ENTRIES } from "../utils/queries";
 import {
@@ -34,14 +43,19 @@ const Dashboard = () => {
         if (data?.getTransactions) {
             const transactions = data.getTransactions;
 
-            // Group transactions by category and calculate totals
-            const categoryTotals = transactions.reduce((acc, transaction) => {
+            // Group transactions by type and category
+            const categoryData = transactions.reduce((acc, transaction) => {
                 const category = transaction.category.name;
-                acc[category] = (acc[category] || 0) + transaction.amount;
+                const type = transaction.type;
+
+                if (!acc[category]) {
+                    acc[category] = { income: 0, expense: 0 };
+                }
+                acc[category][type] += transaction.amount;
+
                 return acc;
             }, {});
 
-            // Separate income and expenses for pie chart
             const incomeTotal = transactions
                 .filter((transaction) => transaction.type === "income")
                 .reduce((sum, transaction) => sum + transaction.amount, 0);
@@ -52,27 +66,24 @@ const Dashboard = () => {
 
             // Prepare Bar Chart Data
             setBarChartData({
-                labels: Object.keys(categoryTotals),
+                labels: Object.keys(categoryData),
                 datasets: [
                     {
-                        label: "Income and Expenses by Category",
-                        data: Object.values(categoryTotals),
-                        backgroundColor: Object.keys(categoryTotals).map(
-                            (category) =>
-                                transactions.find(
-                                    (t) => t.category.name === category
-                                )?.type === "income"
-                                    ? "rgba(75, 192, 192, 0.5)" // Green for income
-                                    : "rgba(255, 99, 132, 0.5)" // Red for expense
+                        label: "Income",
+                        data: Object.keys(categoryData).map(
+                            (category) => categoryData[category].income
                         ),
-                        borderColor: Object.keys(categoryTotals).map(
-                            (category) =>
-                                transactions.find(
-                                    (t) => t.category.name === category
-                                )?.type === "income"
-                                    ? "rgba(75, 192, 192, 1)" // Green border
-                                    : "rgba(255, 99, 132, 1)" // Red border
+                        backgroundColor: "rgba(75, 192, 192, 0.5)", // Green for income
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1,
+                    },
+                    {
+                        label: "Expense",
+                        data: Object.keys(categoryData).map(
+                            (category) => categoryData[category].expense
                         ),
+                        backgroundColor: "rgba(255, 99, 132, 0.5)", // Red for expense
+                        borderColor: "rgba(255, 99, 132, 1)",
                         borderWidth: 1,
                     },
                 ],
@@ -103,21 +114,36 @@ const Dashboard = () => {
     if (error) return <Box>Error loading dashboard data</Box>;
 
     return (
-        <Box p={6} bgGradient="linear(to-r, purple.500, blue.500)" minH="100vh">
+        <Box p={6} bgGradient="linear(to-r, purple.600, blue.500)" minH="100vh">
             <Box
+                maxW="4xl"
+                mx="auto"
                 bg="white"
-                p={10}
+                p={8}
                 borderRadius="lg"
-                boxShadow="xl"
+                boxShadow="2xl"
                 textAlign="center"
             >
-                <Heading fontSize="2xl" mb={6} color="purple.600">
+                <Heading fontSize="3xl" mb={6} color="purple.700">
                     Dashboard Overview
                 </Heading>
 
-                <VStack spacing={8}>
+                {/* Navigation Buttons */}
+                <Flex justifyContent="space-between" mb={6}>
+                    <Link to="/profile">
+                        <Button colorScheme="purple">Go to Profile</Button>
+                    </Link>
+                    <Link to="/entry">
+                        <Button colorScheme="teal">Add New Entry</Button>
+                    </Link>
+                </Flex>
+
+                <VStack spacing={12} align="stretch">
                     {barChartData && (
-                        <Box w="full">
+                        <Box>
+                            <Heading fontSize="xl" mb={4} color="gray.600">
+                                Income and Expense Breakdown by Category
+                            </Heading>
                             <Bar
                                 data={barChartData}
                                 options={{
@@ -125,8 +151,17 @@ const Dashboard = () => {
                                     plugins: {
                                         legend: { position: "top" },
                                         title: {
-                                            display: true,
-                                            text: "Expense and Income Breakdown by Category",
+                                            display: false,
+                                        },
+                                    },
+                                    scales: {
+                                        x: {
+                                            stacked: true,
+                                            ticks: { color: "gray" },
+                                        },
+                                        y: {
+                                            stacked: true,
+                                            ticks: { color: "gray" },
                                         },
                                     },
                                 }}
@@ -134,8 +169,13 @@ const Dashboard = () => {
                         </Box>
                     )}
 
+                    <Divider />
+
                     {pieChartData && (
-                        <Box w="full">
+                        <Box maxW="md" mx="auto">
+                            <Heading fontSize="xl" mb={4} color="gray.600">
+                                Income vs. Expense Overview
+                            </Heading>
                             <Pie
                                 data={pieChartData}
                                 options={{
@@ -143,11 +183,12 @@ const Dashboard = () => {
                                     plugins: {
                                         legend: { position: "top" },
                                         title: {
-                                            display: true,
-                                            text: "Income vs. Expense Overview",
+                                            display: false,
                                         },
                                     },
                                 }}
+                                height={300} // Adjust the height of the pie chart
+                                width={300} // Adjust the width of the pie chart
                             />
                         </Box>
                     )}

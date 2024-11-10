@@ -4,27 +4,32 @@ import {
     Button,
     Input,
     VStack,
-    Text,
     FormControl,
     FormLabel,
     Heading,
     Center,
-    Stack,
     Alert,
     AlertIcon,
     Spinner,
+    useToast,
 } from "@chakra-ui/react";
-import { useQuery } from "@apollo/client";
+import { Link } from "react-router-dom";
+import { useQuery, useMutation } from "@apollo/client";
 import { GET_USER_PROFILE } from "../utils/queries";
+import { UPDATE_PASSWORD } from "../utils/mutations";
 import AuthService from "../utils/auth";
 
 const Profile = () => {
+    const toast = useToast();
     const { data, loading, error } = useQuery(GET_USER_PROFILE);
 
     const [passwordData, setPasswordData] = useState({
         newPassword: "",
         confirmPassword: "",
     });
+
+    const [updatePassword, { loading: updatingPassword }] =
+        useMutation(UPDATE_PASSWORD);
 
     const handlePasswordChange = (e) => {
         const { name, value } = e.target;
@@ -34,29 +39,49 @@ const Profile = () => {
         });
     };
 
-    const handleLogout = () => {
-        AuthService.logout();
-    };
+    const handleUpdatePassword = async () => {
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast({
+                title: "Passwords do not match",
+                description: "Please ensure both password fields match.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
 
-    const redirectToStripe = async () => {
         try {
-            const response = await fetch("/create-checkout-session", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+            await updatePassword({
+                variables: {
+                    newPassword: passwordData.newPassword,
                 },
             });
-
-            const session = await response.json();
-
-            if (session.id) {
-                window.location.href = session.url;
-            } else {
-                console.error("Failed to create checkout session");
-            }
-        } catch (error) {
-            console.error("Error creating checkout session:", error);
+            toast({
+                title: "Password updated",
+                description: "Your password has been successfully updated.",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+            setPasswordData({
+                newPassword: "",
+                confirmPassword: "",
+            });
+        } catch (err) {
+            toast({
+                title: "Error updating password",
+                description: err.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
         }
+    };
+
+    const handleLogout = () => {
+        AuthService.logout();
+        window.location.href = "/"; // Redirect to the base URL
     };
 
     if (loading) return <Spinner size="xl" />;
@@ -64,7 +89,7 @@ const Profile = () => {
         return (
             <Alert status="error">
                 <AlertIcon />
-                Error loading profile information
+                Error loading profile information: {error.message}
             </Alert>
         );
 
@@ -134,53 +159,26 @@ const Profile = () => {
                         />
                     </FormControl>
 
-                    <Box
-                        bgColor="orange.400"
-                        borderRadius="lg"
-                        p={6}
-                        color="white"
-                        textAlign="center"
-                        boxShadow="lg"
-                        my={6}
+                    <Button
+                        colorScheme="green"
+                        width="full"
+                        onClick={handleUpdatePassword}
+                        isLoading={updatingPassword}
                     >
-                        <Stack
-                            direction="row"
-                            spacing={4}
-                            align="center"
-                            justify="center"
-                        >
-                            <Box>
-                                <Text fontSize="lg" fontWeight="bold">
-                                    Unlock Premium Features!
-                                </Text>
-                                <Text fontSize="sm">
-                                    Get access to advanced tools and insights to
-                                    boost your experience at AUD$ 2.88 one-off
-                                    fee only.
-                                </Text>
-                            </Box>
-                        </Stack>
-                        <Button
-                            colorScheme="green"
-                            bg="green.400"
-                            mt={4}
-                            _hover={{ bg: "green.500" }}
-                            onClick={redirectToStripe}
-                        >
-                            Upgrade Now
-                        </Button>
-                    </Box>
-
-                    <Button colorScheme="purple" width="full">
-                        Save Changes
+                        Update Password
                     </Button>
+
+                    <Link to="/dashboard">
+                        <Button colorScheme="blue" width="full">
+                            Go to Dashboard
+                        </Button>
+                    </Link>
 
                     <Button
                         colorScheme="purple"
+                        width="full"
                         variant="outline"
                         onClick={handleLogout}
-                        width="full"
-                        mt={2}
                     >
                         Log Out
                     </Button>

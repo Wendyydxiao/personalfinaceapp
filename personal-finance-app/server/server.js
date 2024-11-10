@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const typeDefs = require("./schemas/typeDefs");
 const resolvers = require("./resolvers/resolvers");
-const { authMiddleware, verifyToken } = require("./utils/auth");
+const { authMiddleware } = require("./utils/auth");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const cors = require("cors");
 
@@ -40,7 +40,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Initialize Apollo Server
-
 const server = new ApolloServer({
     typeDefs,
     resolvers,

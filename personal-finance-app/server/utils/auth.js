@@ -20,15 +20,15 @@ function authMiddleware({ req }) {
     }
 
     if (!token) {
-        console.error("No token provided");
-        return req;
+        console.warn("No token provided");
+        return req; // Pass the request unchanged if no token
     }
 
     const user = verifyToken(token);
     if (user) {
-        req.user = user;
+        req.user = user; // Attach the user to the request if verified
     } else {
-        console.error("Invalid token");
+        console.warn("Invalid or expired token");
     }
 
     return req;

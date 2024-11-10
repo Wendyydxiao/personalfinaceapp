@@ -35,6 +35,11 @@ const typeDefs = gql`
         user: User
     }
 
+    # Response for password update
+    type PasswordUpdateResponse {
+        message: String!
+    }
+
     # Input types for better reusability
     input SignupInput {
         username: String!
@@ -88,6 +93,9 @@ const typeDefs = gql`
         # Category management
         addCategory(name: String!, type: String!, description: String): Category
         deleteCategory(id: ID!): Category
+
+        # Password management
+        updatePassword(newPassword: String!): PasswordUpdateResponse
     }
 `;
 
