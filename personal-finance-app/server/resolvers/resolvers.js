@@ -5,52 +5,41 @@ const { AuthenticationError } = require("apollo-server-express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-// Hardcoded JWT secret key for now
-const JWT_SECRET = "abc123";
+const JWT_SECRET = process.env.JWT_SECRET || "abc123";
 
 const resolvers = {
     Query: {
-        // Fetch the authenticated user's profile
         async getUser(_, __, context) {
             if (!context.user) {
                 throw new AuthenticationError("Not authenticated");
             }
             try {
-                return await User.findById(context.user.id).populate("transactions");
+                return await User.findById(context.user.id).populate({
+                    path: "transactions",
+                    populate: { path: "category" },
+                });
             } catch (err) {
                 throw new Error(`User not found: ${err.message}`);
             }
         },
-
-        // Fetch all users and populate their transactions
-        async getAllUsers(_, __, context) {
+        async getTransactions(_, __, context) {
             if (!context.user) {
                 throw new AuthenticationError("Not authenticated");
             }
             try {
-                return await User.find().populate("transactions");
-            } catch (err) {
-                throw new Error(`Unable to fetch users: ${err.message}`);
-            }
-        },
-
-        // Fetch all transactions for a specific user by their ID, populating each transaction's category
-        async getTransactions(_, { userId }, context) {
-            if (!context.user) {
-                throw new AuthenticationError("Not authenticated");
-            }
-            try {
-                return await Transaction.find({ userId }).populate("category");
+                return await Transaction.find({
+                    userId: context.user.id,
+                }).populate("category");
             } catch (err) {
                 throw new Error(`Unable to fetch transactions: ${err.message}`);
             }
         },
-
-        // Fetch all categories, with an optional filter by type (income or expense)
-        async getCategories(_, { type }) {
-            const query = type ? { type } : {};
+        async getCategories(_, __, context) {
+            if (!context.user) {
+                throw new AuthenticationError("Not authenticated");
+            }
             try {
-                return await Category.find(query);
+                return await Category.find();
             } catch (err) {
                 throw new Error(`Unable to fetch categories: ${err.message}`);
             }
@@ -58,170 +47,113 @@ const resolvers = {
     },
 
     Mutation: {
-        // Register a new user, hashing their password and generating a JWT
         async signup(_, { username, email, password }) {
-            try {
-                console.log("Checking if user already exists...");
-                const existingUser = await User.findOne({ email });
-                if (existingUser) {
-                    throw new Error("Email already in use");
-                }
-
-                console.log("Creating new user...");
-                const user = await User.create({
-                    username,
-                    email,
-                    password, // No manual hashing here, let the pre-save hook do it
-                    createdAt: new Date().toISOString(),
-                });
-
-                console.log("Generating JWT...");
-                const token = jwt.sign(
-                    {
-                        id: user._id,
-                        username: user.username,
-                        email: user.email,
-                    },
-                    JWT_SECRET,
-                    {
-                        expiresIn: "1h",
-                    }
-                );
-
-                console.log("User signup successful");
-                return { token, user };
-            } catch (err) {
-                console.error("Signup error:", err);
-                throw new Error(`Unable to signup user: ${err.message}`);
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                throw new Error("Email already in use");
             }
-        },
-
-        // Login Resolver
-        async login(_, { email, password }) {
-            console.log("Logging in user...");
-            const user = await User.findOne({ email });
-            if (!user) {
-                throw new AuthenticationError("User not found");
-            }
-
-            console.log("Comparing password...");
-            const isValidPassword = await bcrypt.compare(
-                password,
-                user.password
-            );
-            console.log("Is valid password:", isValidPassword);
-
-            if (!isValidPassword) {
-                throw new AuthenticationError("Incorrect password");
-            }
-
+            const user = await User.create({ username, email, password });
             const token = jwt.sign(
-                { id: user._id, username: user.username, email: user.email },
+                { id: user._id, username, email },
                 JWT_SECRET,
                 {
                     expiresIn: "1h",
                 }
             );
-            console.log("Login successful, token generated");
             return { token, user };
         },
-
-        // Add a new transaction for a user, linking it to the specified category
+        async login(_, { email, password }) {
+            const user = await User.findOne({ email });
+            if (!user) {
+                throw new AuthenticationError("User not found");
+            }
+            const isValidPassword = await user.isCorrectPassword(password);
+            if (!isValidPassword) {
+                throw new AuthenticationError("Incorrect password");
+            }
+            const token = jwt.sign(
+                { id: user._id, username: user.username, email },
+                JWT_SECRET,
+                { expiresIn: "1h" }
+            );
+            return { token, user };
+        },
+        async updatePassword(_, { newPassword }, context) {
+            if (!context.user) {
+                throw new AuthenticationError("Not authenticated");
+            }
+            try {
+                const hashedPassword = await bcrypt.hash(newPassword, 10);
+                await User.findByIdAndUpdate(context.user.id, {
+                    password: hashedPassword,
+                });
+                return { message: "Password updated successfully" };
+            } catch (err) {
+                throw new Error(`Failed to update password: ${err.message}`);
+            }
+        },
         async addTransaction(_, { input }, context) {
             if (!context.user) {
                 throw new AuthenticationError("Not authenticated");
             }
-
-            const { userId, type, amount, categoryId, date, description } =
-                input;
-
+            const { type, amount, date, description, category } = input;
             try {
-                const transaction = new Transaction({
-                    userId,
-                    type,
+                const normalizedType = type.toLowerCase();
+                let categoryDoc = await Category.findOne({
+                    name: category,
+                    type: normalizedType,
+                });
+                if (!categoryDoc) {
+                    categoryDoc = await Category.create({
+                        name: category,
+                        type: normalizedType,
+                    });
+                }
+                const transaction = await Transaction.create({
+                    userId: context.user.id,
+                    type: normalizedType,
                     amount,
-                    category: categoryId,
                     date,
                     description,
+                    category: categoryDoc._id,
                 });
-                await transaction.save();
-
-                await User.findByIdAndUpdate(userId, {
+                await User.findByIdAndUpdate(context.user.id, {
                     $push: { transactions: transaction._id },
                 });
-
-                return await transaction.populate("category");
+                return transaction.populate("category");
             } catch (err) {
                 throw new Error(`Unable to add transaction: ${err.message}`);
             }
         },
-
-        // Update specific fields of an existing transaction by ID
-        async updateTransaction(_, { input }, context) {
-            if (!context.user) {
-                throw new AuthenticationError("Not authenticated");
-            }
-
-            const { id, type, amount, categoryId, date, description } = input;
-
-            const updateData = {
-                ...(type && { type }),
-                ...(amount && { amount }),
-                ...(categoryId && { category: categoryId }),
-                ...(date && { date }),
-                ...(description && { description }),
-            };
-
-            try {
-                return await Transaction.findByIdAndUpdate(id, updateData, {
-                    new: true,
-                }).populate("category");
-            } catch (err) {
-                throw new Error(`Unable to update transaction: ${err.message}`);
-            }
-        },
-
-        // Delete a transaction by ID and remove its reference from the user's transactions
         async deleteTransaction(_, { id }, context) {
             if (!context.user) {
                 throw new AuthenticationError("Not authenticated");
             }
-
             try {
                 const transaction = await Transaction.findByIdAndDelete(id);
                 if (!transaction) throw new Error("Transaction not found");
-
-                await User.findByIdAndUpdate(transaction.userId, {
+                await User.findByIdAndUpdate(context.user.id, {
                     $pull: { transactions: id },
                 });
-
                 return transaction;
             } catch (err) {
                 throw new Error(`Unable to delete transaction: ${err.message}`);
             }
         },
-
-        // Add a new category with a specified name, type, and description
         async addCategory(_, { name, type, description }, context) {
             if (!context.user) {
                 throw new AuthenticationError("Not authenticated");
             }
-
             try {
-                const category = new Category({ name, type, description });
-                await category.save();
-                return category;
+                return await Category.create({ name, type, description });
             } catch (err) {
                 throw new Error(`Unable to add category: ${err.message}`);
             }
         },
-
-        // Delete a category by ID
         async deleteCategory(_, { id }, context) {
             if (!context.user) {
                 throw new AuthenticationError("Not authenticated");
             }
-
             try {
                 const category = await Category.findByIdAndDelete(id);
                 if (!category) throw new Error("Category not found");

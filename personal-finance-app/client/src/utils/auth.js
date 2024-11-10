@@ -21,15 +21,12 @@ class AuthService {
 
     login(idToken) {
         localStorage.setItem("id_token", idToken);
-        window.location.assign("/dashboard"); // After login, ensure you direct to a logged-in route
     }
 
     logout() {
         localStorage.removeItem("id_token");
-        window.location.assign("/"); // Redirect to login page
+        window.location.assign("/");
     }
 }
 
-
-const authService = new AuthService();
-export default authService;
+export default new AuthService();

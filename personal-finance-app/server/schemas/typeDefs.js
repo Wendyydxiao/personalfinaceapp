@@ -35,6 +35,11 @@ const typeDefs = gql`
         user: User
     }
 
+    # Response for password update
+    type PasswordUpdateResponse {
+        message: String!
+    }
+
     # Input types for better reusability
     input SignupInput {
         username: String!
@@ -43,10 +48,9 @@ const typeDefs = gql`
     }
 
     input TransactionInput {
-        userId: ID!
         type: String!
         amount: Float!
-        categoryId: ID!
+        category: String! # Accepts the category name
         date: String
         description: String
     }
@@ -55,7 +59,7 @@ const typeDefs = gql`
         id: ID!
         type: String
         amount: Float
-        categoryId: ID
+        category: String # Accepts the category name
         date: String
         description: String
     }
@@ -68,8 +72,8 @@ const typeDefs = gql`
         # Fetch all users
         getAllUsers: [User]
 
-        # Fetch all transactions for a user
-        getTransactions(userId: ID!): [Transaction]
+        # Fetch all transactions for the authenticated user
+        getTransactions(userId: ID): [Transaction]
 
         # Fetch all categories (or filter by type)
         getCategories(type: String): [Category]
@@ -89,6 +93,9 @@ const typeDefs = gql`
         # Category management
         addCategory(name: String!, type: String!, description: String): Category
         deleteCategory(id: ID!): Category
+
+        # Password management
+        updatePassword(newPassword: String!): PasswordUpdateResponse
     }
 `;
 

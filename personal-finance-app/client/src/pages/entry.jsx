@@ -1,256 +1,246 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  Input,
-  VStack,
-  HStack,
-  Text,
-  FormControl,
-  FormLabel,
-  Heading,
-  IconButton,
-  Select,
-  Spinner,
-  Alert,
-  AlertIcon,
-} from '@chakra-ui/react';
-import { DeleteIcon } from '@chakra-ui/icons';
-import { useQuery, useMutation } from '@apollo/client';
-import { GET_USER_ENTRIES } from '../utils/queries';
-import { ADD_ENTRY,DELETE_ENTRY } from '../utils/mutations';
+    Box,
+    Button,
+    Input,
+    VStack,
+    FormControl,
+    FormLabel,
+    Heading,
+    Select,
+    Spinner,
+    Alert,
+    AlertIcon,
+    useToast,
+} from "@chakra-ui/react";
+import { Link } from "react-router-dom";
+import { useQuery, useMutation } from "@apollo/client";
+import { GET_CATEGORIES, GET_USER_ENTRIES } from "../utils/queries";
+import { ADD_TRANSACTION, ADD_CATEGORY } from "../utils/mutations";
 
 const Entry = () => {
+    const [newEntry, setNewEntry] = useState({
+        type: "Expense",
+        category: "",
+        amount: "",
+        date: "",
+        description: "",
+    });
 
-  const [newEntry, setNewEntry] = useState({
-    type: 'Expense',
-    category: '',
-    amount: '',
-    date: '',
-    notes: '',
-  });
+    const [categories, setCategories] = useState([]);
+    const { data: categoryData, loading: categoryLoading } =
+        useQuery(GET_CATEGORIES);
+    const {
+        data,
+        loading: transactionLoading,
+        error,
+        refetch,
+    } = useQuery(GET_USER_ENTRIES);
 
-  // const { data, loading, error, refetch } = useQuery(GET_USER_ENTRIES);
-  const { data, loading, error, refetch } = useQuery(GET_USER_ENTRIES, {
-    variables: { userId: JSON.parse(localStorage.getItem('user')).user._id},
-  });
+    const [addTransaction] = useMutation(ADD_TRANSACTION);
+    const [addCategory] = useMutation(ADD_CATEGORY);
 
-  // console.log(JSON.parse(localStorage.getItem('user')).user);
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
+    const toast = useToast(); // For displaying success or error messages
 
-  const [addEntry] = useMutation(ADD_ENTRY);
-  const [deleteEntry] = useMutation(DELETE_ENTRY);
+    useEffect(() => {
+        if (categoryData?.getCategories) {
+            setCategories(categoryData.getCategories);
+        }
+    }, [categoryData]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewEntry({ ...newEntry, [name]: value });
-  };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewEntry({ ...newEntry, [name]: value });
+    };
 
-  const handleAddEntry = async() => {
-    try {
-      await addEntry({
-        variables: {        
-         input: {
-          type: newEntry.type,
-          amount: parseFloat(newEntry.amount),
-          date: newEntry.date,
-          description: newEntry.notes,
-          category: newEntry.category,
-         },
-        },
-      });
-      setNewEntry({ type: 'Expense', category: '', amount: '', date: '', notes: '' });
-      refetch();
-    } catch (err) {
-      console.error("Error adding transcation:", err);
-    }
-  };
+    const handleAddEntry = async () => {
+        try {
+            const normalizedType = newEntry.type.toLowerCase();
+            let category = categories.find(
+                (cat) => cat.name === newEntry.category
+            );
 
+            if (!category) {
+                const { data: newCategory } = await addCategory({
+                    variables: {
+                        name: newEntry.category,
+                        type: normalizedType,
+                    },
+                });
+                category = newCategory.addCategory;
+                setCategories([...categories, category]);
+            }
 
-  const handleDeleteEntry = async(id) => {
-    try {
-      await deleteEntry({ variables: { id } });
-      refetch();
-    } catch (err) {
-      console.error("Error deleting transcation:", err);
-    }
-  };
+            await addTransaction({
+                variables: {
+                    input: {
+                        type: normalizedType,
+                        amount: parseFloat(newEntry.amount),
+                        date: newEntry.date,
+                        description: newEntry.description,
+                        category: category.name,
+                    },
+                },
+            });
 
+            // Reset form after successful entry
+            setNewEntry({
+                type: "Expense",
+                category: "",
+                amount: "",
+                date: "",
+                description: "",
+            });
 
+            refetch();
 
-  const incomeCategories = ['Salary', 'Investment', 'Freelancing', 'Others'];
-  const expenseCategories = [
-    'Rent/Mortgage',
-    'Utilities',
-    'Groceries',
-    'Dining Out',
-    'Transportation',
-    'Healthcare',
-    'Insurance',
-    'Debt Payments',
-    'Education',
-    'Personal Care',
-    'Entertainment',
-    'Clothing',
-    'Savings/Investments',
-    'Gifts/Donations',
-    'Travel/Vacation',
-    'Miscellaneous'];
+            // Show success toast
+            toast({
+                title: "Transaction Added",
+                description: "Your transaction has been successfully added.",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+        } catch (err) {
+            console.error("Error adding transaction:", err.message);
+            // Show error toast
+            toast({
+                title: "Error Adding Transaction",
+                description: err.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        }
+    };
 
-    if (loading) return <Spinner size="xl" />;
-    if (error) return (
-      <Alert status="error">
-        <AlertIcon />
-        Error fetching entries
-      </Alert>
-    );
+    if (transactionLoading || categoryLoading) return <Spinner size="xl" />;
+    if (error)
+        return (
+            <Alert status="error">
+                <AlertIcon />
+                Error fetching entries
+            </Alert>
+        );
 
-
-  return (
-    <Box
-      minH="100vh"
-      bgGradient="linear(to-r, purple.500, blue.500)"
-      p={6}
-    >
-      <Box
-        maxW="lg"
-        w="full"
-        bg="white"
-        p={10}
-        borderRadius="lg"
-        boxShadow="xl"
-        textAlign="center"
-        mb={10}
-        mx="auto"
-      >
-        <Heading fontSize="2xl" color="purple.600" mb={6}>
-          Manage Expenses & Income
-        </Heading>
-
-        <VStack spacing={4} align="stretch">
-          <FormControl id="type">
-            <FormLabel>Entry Type</FormLabel>
-            <Select
-              name="type"
-              value={newEntry.type}
-              onChange={handleInputChange}
-            >
-              <option value="Income">Income</option>
-              <option value="Expense">Expense</option>
-            </Select>
-          </FormControl>
-
-          <FormControl id="category">
-            <FormLabel>Category</FormLabel>
-            <Select
-              placeholder="Select category"
-              name="category"
-              value={newEntry.category}
-              onChange={handleInputChange}
-            >
-              {(newEntry.type === 'Income' ? incomeCategories : expenseCategories).map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl id="amount">
-            <FormLabel>Amount</FormLabel>
-            <Input
-              type="number"
-              placeholder="Enter amount"
-              name="amount"
-              value={newEntry.amount}
-              onChange={handleInputChange}
-            />
-          </FormControl>
-
-          <FormControl id="date">
-            <FormLabel>Date</FormLabel>
-            <Input
-              type="date"
-              name="date"
-              value={newEntry.date}
-              onChange={handleInputChange}
-            />
-          </FormControl>
-
-          <FormControl id="notes">
-            <FormLabel>Notes</FormLabel>
-            <Input
-              type="text"
-              placeholder="Optional notes"
-              name="description"
-              value={newEntry.notes}
-              onChange={handleInputChange}
-            />
-          </FormControl>
-
-          <Button colorScheme="purple" onClick={handleAddEntry} width="full">
-            {newEntry.id ? 'Update Entry' : 'Add Entry'}
-          </Button>
-        </VStack>
-      </Box>
-
-      <Box
-        maxW="lg"
-        w="full"
-        bg="white"
-        p={10}
-        borderRadius="lg"
-        boxShadow="xl"
-        textAlign="center"
-        mx="auto"
-      >
-        <Heading fontSize="lg" color="purple.600" mb={6}>
-          Your Entries
-        </Heading>
-
-        {/* {(data||[])?.userEntries?.length > 0 ? ( */}
-        {data?.getTransactions?.length > 0 ? (
-          <VStack spacing={4} align="stretch">
-            {data.getTransactions.map((entry) => (
-              <Box
-                key={entry._id}
-                borderWidth="1px"
+    return (
+        <Box minH="100vh" bgGradient="linear(to-r, purple.500, blue.500)" p={6}>
+            <Box
+                maxW="lg"
+                w="full"
+                bg="white"
+                p={10}
                 borderRadius="lg"
-                p={4}
-                bg="gray.50"
-              >
-                <HStack justify="space-between">
-                  <Box>
-                    <Text fontWeight="bold">{entry.type}: {entry.category}</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      ${entry.amount} on {new Date(entry.date).toLocaleDateString()}
-                    </Text>
-                    <Text fontSize="sm" color="gray.500">
-                      {entry.description || 'N/A'}
-                    </Text>
-                  </Box>
-                  <HStack>
+                boxShadow="xl"
+                textAlign="center"
+                mx="auto"
+                mb={10}
+            >
+                <Heading fontSize="2xl" color="purple.600" mb={6}>
+                    Add a New Transaction
+                </Heading>
 
-                    <IconButton
-                      icon={<DeleteIcon />}
-                      colorScheme="red"
-                      onClick={() => handleDeleteEntry(entry._id)}
-                      aria-label="Delete entry"
-                    />
-                  </HStack>
-                </HStack>
-              </Box>
-            ))}
-          </VStack>
-        ) : (
-          <Text color="gray.500">No entries added yet.</Text>
-        )}
+                <VStack spacing={4} align="stretch">
+                    <FormControl id="type">
+                        <FormLabel>Transaction Type</FormLabel>
+                        <Select
+                            name="type"
+                            value={newEntry.type}
+                            onChange={handleInputChange}
+                        >
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                        </Select>
+                    </FormControl>
 
-      </Box>
-    </Box>
-  );
+                    <FormControl id="category">
+                        <FormLabel>Category</FormLabel>
+                        <Select
+                            placeholder="Select or enter a category"
+                            name="category"
+                            value={newEntry.category}
+                            onChange={handleInputChange}
+                        >
+                            {categories
+                                .filter(
+                                    (cat) =>
+                                        cat.type === newEntry.type.toLowerCase()
+                                )
+                                .map((category) => (
+                                    <option
+                                        key={category._id}
+                                        value={category.name}
+                                    >
+                                        {category.name}
+                                    </option>
+                                ))}
+                        </Select>
+                        <Input
+                            mt={2}
+                            placeholder="Add a new category"
+                            value={newEntry.category}
+                            onChange={(e) =>
+                                setNewEntry({
+                                    ...newEntry,
+                                    category: e.target.value,
+                                })
+                            }
+                        />
+                    </FormControl>
+
+                    <FormControl id="amount">
+                        <FormLabel>Amount</FormLabel>
+                        <Input
+                            type="number"
+                            placeholder="Enter amount"
+                            name="amount"
+                            value={newEntry.amount}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
+
+                    <FormControl id="date">
+                        <FormLabel>Date</FormLabel>
+                        <Input
+                            type="date"
+                            name="date"
+                            value={newEntry.date}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
+
+                    <FormControl id="description">
+                        <FormLabel>Description</FormLabel>
+                        <Input
+                            type="text"
+                            placeholder="Optional description"
+                            name="description"
+                            value={newEntry.description}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
+
+                    <Button
+                        colorScheme="purple"
+                        onClick={handleAddEntry}
+                        width="full"
+                    >
+                        Add Entry
+                    </Button>
+                </VStack>
+
+                {/* Navigation Button */}
+                <Box mt={6}>
+                    <Link to="/dashboard">
+                        <Button colorScheme="teal" width="full">
+                            Back to Dashboard
+                        </Button>
+                    </Link>
+                </Box>
+            </Box>
+        </Box>
+    );
 };
 
 export default Entry;
