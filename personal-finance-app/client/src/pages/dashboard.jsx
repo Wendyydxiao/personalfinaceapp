@@ -73,8 +73,8 @@ const Dashboard = () => {
                         data: Object.keys(categoryData).map(
                             (category) => categoryData[category].income
                         ),
-                        backgroundColor: "rgba(75, 192, 192, 0.5)", // Green for income
-                        borderColor: "rgba(75, 192, 192, 1)",
+                        backgroundColor: "rgba(131, 56, 236, 0.7)", // Purple
+                        borderColor: "rgba(131, 56, 236, 1)",
                         borderWidth: 1,
                     },
                     {
@@ -82,8 +82,8 @@ const Dashboard = () => {
                         data: Object.keys(categoryData).map(
                             (category) => categoryData[category].expense
                         ),
-                        backgroundColor: "rgba(255, 99, 132, 0.5)", // Red for expense
-                        borderColor: "rgba(255, 99, 132, 1)",
+                        backgroundColor: "rgba(56, 163, 236, 0.7)", // Blue
+                        borderColor: "rgba(56, 163, 236, 1)",
                         borderWidth: 1,
                     },
                 ],
@@ -96,12 +96,12 @@ const Dashboard = () => {
                     {
                         data: [incomeTotal, expenseTotal],
                         backgroundColor: [
-                            "rgba(75, 192, 192, 0.5)", // Green for income
-                            "rgba(255, 99, 132, 0.5)", // Red for expense
+                            "rgba(131, 56, 236, 0.7)", // Purple
+                            "rgba(56, 163, 236, 0.7)", // Blue
                         ],
                         borderColor: [
-                            "rgba(75, 192, 192, 1)", // Green border
-                            "rgba(255, 99, 132, 1)", // Red border
+                            "rgba(131, 56, 236, 1)", // Purple border
+                            "rgba(56, 163, 236, 1)", // Blue border
                         ],
                         borderWidth: 1,
                     },
@@ -141,31 +141,46 @@ const Dashboard = () => {
                 <VStack spacing={12} align="stretch">
                     {barChartData && (
                         <Box>
-                            <Heading fontSize="xl" mb={4} color="gray.600">
+                            <Heading fontSize="xl" mb={4} color="purple.700">
                                 Income and Expense Breakdown by Category
                             </Heading>
-                            <Bar
-                                data={barChartData}
-                                options={{
-                                    responsive: true,
-                                    plugins: {
-                                        legend: { position: "top" },
-                                        title: {
-                                            display: false,
+                            <Box
+                                style={{ maxWidth: "700px", margin: "0 auto" }}
+                            >
+                                <Bar
+                                    data={barChartData}
+                                    options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                position: "top",
+                                                labels: {
+                                                    color: "purple.600",
+                                                },
+                                            },
+                                            title: {
+                                                display: false,
+                                            },
                                         },
-                                    },
-                                    scales: {
-                                        x: {
-                                            stacked: true,
-                                            ticks: { color: "gray" },
+                                        scales: {
+                                            x: {
+                                                ticks: { color: "gray" },
+                                                grid: {
+                                                    color: "rgba(200, 200, 200, 0.2)",
+                                                },
+                                            },
+                                            y: {
+                                                ticks: { color: "gray" },
+                                                grid: {
+                                                    color: "rgba(200, 200, 200, 0.2)",
+                                                },
+                                            },
                                         },
-                                        y: {
-                                            stacked: true,
-                                            ticks: { color: "gray" },
-                                        },
-                                    },
-                                }}
-                            />
+                                    }}
+                                />
+                            </Box>
                         </Box>
                     )}
 
@@ -173,7 +188,7 @@ const Dashboard = () => {
 
                     {pieChartData && (
                         <Box maxW="md" mx="auto">
-                            <Heading fontSize="xl" mb={4} color="gray.600">
+                            <Heading fontSize="xl" mb={4} color="purple.700">
                                 Income vs. Expense Overview
                             </Heading>
                             <Pie
@@ -181,14 +196,15 @@ const Dashboard = () => {
                                 options={{
                                     responsive: true,
                                     plugins: {
-                                        legend: { position: "top" },
+                                        legend: {
+                                            position: "top",
+                                            labels: { color: "purple.600" },
+                                        },
                                         title: {
                                             display: false,
                                         },
                                     },
                                 }}
-                                height={300} // Adjust the height of the pie chart
-                                width={300} // Adjust the width of the pie chart
                             />
                         </Box>
                     )}
