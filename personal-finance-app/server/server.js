@@ -23,7 +23,9 @@ const app = express();
 // CORS Configuration
 const corsOptions = {
     origin:
-        process.env.NODE_ENV === "production" ? process.env.CLIENT_URL : "*",
+        process.env.NODE_ENV === "production"
+            ? process.env.CLIENT_URL || "*"
+            : "*",
     credentials: true,
 };
 app.use(cors(corsOptions));
