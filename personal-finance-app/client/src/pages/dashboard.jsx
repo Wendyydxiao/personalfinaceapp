@@ -1,19 +1,43 @@
+import React, { useEffect, useState } from "react";
+import {
+    Box,
+    Heading,
+    Spinner,
+    VStack,
+    Flex,
+    Divider,
+    Button,
+} from "@chakra-ui/react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@apollo/client";
+import { GET_USER_ENTRIES } from "../utils/queries";
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+} from "chart.js";
+import { Bar, Pie } from "react-chartjs-2";
+
+// Register Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend
+);
+
 const Dashboard = () => {
     const [barChartData, setBarChartData] = useState(null);
     const [pieChartData, setPieChartData] = useState(null);
-    const [monthlyExpensesData, setMonthlyExpensesData] = useState(null);
-
     const { data, loading, error } = useQuery(GET_USER_ENTRIES);
-
-    const getMonthYear = (dateString) => {
-        if (!dateString) return null; // Skip if no date
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return null; // Skip invalid date
-        return date.toLocaleString("default", {
-            month: "long",
-            year: "numeric",
-        }); // e.g., "January 2024"
-    };
 
     useEffect(() => {
         if (data?.getTransactions) {
@@ -39,22 +63,6 @@ const Dashboard = () => {
             const expenseTotal = transactions
                 .filter((transaction) => transaction.type === "expense")
                 .reduce((sum, transaction) => sum + transaction.amount, 0);
-
-            // Group expenses by month (include year)
-            const monthlyExpenses = transactions
-                .filter(
-                    (transaction) =>
-                        transaction.type === "expense" && transaction.date
-                )
-                .reduce((acc, transaction) => {
-                    const monthYear = getMonthYear(transaction.date);
-                    if (!monthYear) return acc; // Skip invalid dates
-                    if (!acc[monthYear]) {
-                        acc[monthYear] = 0;
-                    }
-                    acc[monthYear] += transaction.amount;
-                    return acc;
-                }, {});
 
             // Prepare Bar Chart Data
             setBarChartData({
@@ -95,20 +103,6 @@ const Dashboard = () => {
                             "rgba(131, 56, 236, 1)", // Purple border
                             "rgba(56, 163, 236, 1)", // Blue border
                         ],
-                        borderWidth: 1,
-                    },
-                ],
-            });
-
-            // Prepare Monthly Expenses Data
-            setMonthlyExpensesData({
-                labels: Object.keys(monthlyExpenses),
-                datasets: [
-                    {
-                        label: "Expenses by Month",
-                        data: Object.values(monthlyExpenses),
-                        backgroundColor: "rgba(255, 99, 132, 0.7)", // Red
-                        borderColor: "rgba(255, 99, 132, 1)",
                         borderWidth: 1,
                     },
                 ],
@@ -212,53 +206,6 @@ const Dashboard = () => {
                                     },
                                 }}
                             />
-                        </Box>
-                    )}
-
-                    <Divider />
-
-                    {monthlyExpensesData && (
-                        <Box>
-                            <Heading fontSize="xl" mb={4} color="purple.700">
-                                Expenses by Month
-                            </Heading>
-                            <Box
-                                style={{ maxWidth: "700px", margin: "0 auto" }}
-                            >
-                                <Bar
-                                    data={monthlyExpensesData}
-                                    options={{
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        plugins: {
-                                            legend: {
-                                                display: true,
-                                                position: "top",
-                                                labels: {
-                                                    color: "purple.600",
-                                                },
-                                            },
-                                            title: {
-                                                display: false,
-                                            },
-                                        },
-                                        scales: {
-                                            x: {
-                                                ticks: { color: "gray" },
-                                                grid: {
-                                                    color: "rgba(200, 200, 200, 0.2)",
-                                                },
-                                            },
-                                            y: {
-                                                ticks: { color: "gray" },
-                                                grid: {
-                                                    color: "rgba(200, 200, 200, 0.2)",
-                                                },
-                                            },
-                                        },
-                                    }}
-                                />
-                            </Box>
                         </Box>
                     )}
                 </VStack>
