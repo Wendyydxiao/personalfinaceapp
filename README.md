@@ -1,6 +1,6 @@
-# Personal Finance Tracker
+# Spendify - Personal Finance Tracker
 
-The Personal Finance Tracker is an interactive MERN (MongoDB, Express.js, React, Node.js) single-page application designed to help users manage and track their financial transactions. Users can create an account, log in, and securely manage their income and expenses. This project showcases a comprehensive full-stack development approach, highlighting authentication, data management, and a modern, responsive user interface.
+Spendify is an interactive MERN (MongoDB, Express.js, React, Node.js) application designed to help users manage and track their financial transactions. Users can create an account, log in, and securely manage their income and expenses. This project showcases a comprehensive full-stack development approach, highlighting authentication, data management, and a modern, responsive user interface.
 
 ## :ledger: Index
 
@@ -17,7 +17,7 @@ The Personal Finance Tracker is an interactive MERN (MongoDB, Express.js, React,
 
 ## :beginner: About
 
-The Personal Finance Tracker app is built to simplify personal financial management by allowing users to log their transactions, categorize expenses, and view financial summaries. The app provides an intuitive and responsive user experience with a strong focus on data security and user authentication.
+Spendify app is built to simplify personal financial management by allowing users to log their transactions, categorize expenses, and view financial summaries. The app provides an intuitive and responsive user experience with a strong focus on data security and user authentication.
 
 ### :file_folder: File Structure
 
@@ -67,20 +67,20 @@ PERSONAL-FINANCE-APP/
 
 ## :rocket: Deployment
 
-The app is deployed on Render for live use: [Visit the Personal Finance Tracker](PUT LINK HERE)
+The app is deployed on Render for live use: https://personalfinaceapp-y9ns.onrender.com
 
-###  :fire: Contribution
+### :fire: Contribution
 
- - Your contributions are always welcome and greatly appreciated. Here are some ways you can contribute to the project:
+- Your contributions are always welcome and greatly appreciated. Here are some ways you can contribute to the project:
 
- 1. **Report a bug** <br>
- If you think you have encountered a bug, and I should know about it, feel free to report it here [here](https://github.com/Wendyydxiao/personalfinaceapp/issues). I will look into it and take the necessary steps.
- 
- 2. **Request a feature** <br>
- If you have a feature idea that you think would enhance the project, you can request it [here](https://github.com/Wendyydxiao/personalfinaceapp/issues), If the feature is deemed viable, it will be considered for development. 
+1.  **Report a bug** <br>
+    If you think you have encountered a bug, and I should know about it, feel free to report it here [here](https://github.com/Wendyydxiao/personalfinaceapp/issues). I will look into it and take the necessary steps.
 
- 3. **Create a pull request** <br>
- The best way to contribute is by creating a pull request. The community will appreciate your efforts. You can start by picking up any open issues from [here](https://github.com/Wendyydxiao/personalfinaceapp/issues) and submitting a pull request.
+2.  **Request a feature** <br>
+    If you have a feature idea that you think would enhance the project, you can request it [here](https://github.com/Wendyydxiao/personalfinaceapp/issues), If the feature is deemed viable, it will be considered for development.
+
+3.  **Create a pull request** <br>
+    The best way to contribute is by creating a pull request. The community will appreciate your efforts. You can start by picking up any open issues from [here](https://github.com/Wendyydxiao/personalfinaceapp/issues) and submitting a pull request.
 
 ## :notebook: Key Learning Points
 
@@ -93,24 +93,30 @@ The app is deployed on Render for live use: [Visit the Personal Finance Tracker]
 ## :page_facing_up: Resources
 
 ### Tools Used
+
 - **VS Code**: Integrated development environment.
 - **Git Bash**: Command-line interface for version control.
 - **MongoDB Atlas**: Cloud database service.
 - **Render**: Hosting service for the app.
+- **Chakra UI & React**: React component libraries.
 
 ### Libraries and APIs
+
 - **Express.js**: Backend server framework.
 - **Apollo Server**: GraphQL server implementation.
 - **Mongoose**: MongoDB object modeling tool.
 - **bcrypt**: Library for password hashing.
+- **Stripe**: Stripe payment API.
 
 ## :camera: Gallery
 
-Screenshots and previews are available here: [Gallery Link](GALLERY LINK HERE)
+Screenshots and previews are available here:
+<img src="/personal-finance-app/client/assets/Spendify - Homepage.png" width="350" title="page screenshot">
 
 ## :star2: Credit/Acknowledgment
 
 Developed by:
+
 - [Adam Todorovic](https://github.com/ProjectAdam95)
 - [Wendy Xiao](https://github.com/Wendyydxiao)
 - [Benjamin Rice](https://github.com/BenJR546)
