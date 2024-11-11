@@ -39,6 +39,9 @@ if (process.env.NODE_ENV === "production") {
     });
 }
 
+// Log the CLIENT_URL to verify it's set correctly
+console.log("Client URL:", process.env.CLIENT_URL);
+
 // Initialize Apollo Server
 const server = new ApolloServer({
     typeDefs,
@@ -62,13 +65,10 @@ app.post("/create-checkout-session", async (req, res) => {
                 },
             ],
             mode: "payment",
-            success_url: `${
-                process.env.CLIENT_URL || req.headers.origin
-            }/profile`,
-            cancel_url: `${
-                process.env.CLIENT_URL || req.headers.origin
-            }/profile`,
+            success_url: `${process.env.CLIENT_URL}/profile`,
+            cancel_url: `${process.env.CLIENT_URL}/cancel`,
         });
+
         res.json({ id: session.id, url: session.url }); // Return the full URL
     } catch (error) {
         console.error("Error creating Stripe session:", error.message);

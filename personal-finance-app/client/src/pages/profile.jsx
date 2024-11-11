@@ -13,7 +13,6 @@ import {
     Spinner,
     useToast,
     Text,
-    Icon,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
@@ -21,7 +20,7 @@ import { GET_USER_PROFILE } from "../utils/queries";
 import { UPDATE_PASSWORD } from "../utils/mutations";
 import AuthService from "../utils/auth";
 import axios from "axios";
-import { StarIcon } from "@chakra-ui/icons"; // Star icon for a premium feel
+import { StarIcon } from "@chakra-ui/icons";
 
 const Profile = () => {
     const toast = useToast();
@@ -88,20 +87,26 @@ const Profile = () => {
     };
 
     const handleUpgradeNow = async () => {
+        const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://personalfinaceapp-y9ns.onrender.com";
+        
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/create-checkout-session`);
-            window.location.href = response.data.url;
+            const response = await axios.post(`${API_BASE_URL}/create-checkout-session`);
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            } else {
+                throw new Error("Invalid response from the server");
+            }
         } catch (error) {
+            console.error("Failed to start checkout process:", error);
             toast({
                 title: "Error",
-                description: "Failed to start checkout process.",
+                description: "Failed to start checkout process. Please try again later.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
             });
         }
     };
-    
 
     if (loading) return <Spinner size="xl" />;
     if (error)
@@ -173,7 +178,6 @@ const Profile = () => {
                         Update Password
                     </Button>
 
-                    {/* Distinct Upgrade Now Button */}
                     <Box mt={8} textAlign="center">
                         <Button
                             colorScheme="yellow"
