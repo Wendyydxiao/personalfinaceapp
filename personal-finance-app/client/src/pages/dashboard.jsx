@@ -1,39 +1,3 @@
-import React, { useEffect, useState } from "react";
-import {
-    Box,
-    Heading,
-    Spinner,
-    VStack,
-    Flex,
-    Divider,
-    Button,
-} from "@chakra-ui/react";
-import { Link } from "react-router-dom";
-import { useQuery } from "@apollo/client";
-import { GET_USER_ENTRIES } from "../utils/queries";
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend,
-} from "chart.js";
-import { Bar, Pie } from "react-chartjs-2";
-
-// Register Chart.js components
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    ArcElement,
-    Title,
-    Tooltip,
-    Legend
-);
-
 const Dashboard = () => {
     const [barChartData, setBarChartData] = useState(null);
     const [pieChartData, setPieChartData] = useState(null);
@@ -41,9 +5,14 @@ const Dashboard = () => {
 
     const { data, loading, error } = useQuery(GET_USER_ENTRIES);
 
-    const getMonthName = (dateString) => {
+    const getMonthYear = (dateString) => {
+        if (!dateString) return null; // Skip if no date
         const date = new Date(dateString);
-        return date.toLocaleString("default", { month: "long" });
+        if (isNaN(date.getTime())) return null; // Skip invalid date
+        return date.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+        }); // e.g., "January 2024"
     };
 
     useEffect(() => {
@@ -71,15 +40,19 @@ const Dashboard = () => {
                 .filter((transaction) => transaction.type === "expense")
                 .reduce((sum, transaction) => sum + transaction.amount, 0);
 
-            // Group expenses by month
+            // Group expenses by month (include year)
             const monthlyExpenses = transactions
-                .filter((transaction) => transaction.type === "expense")
+                .filter(
+                    (transaction) =>
+                        transaction.type === "expense" && transaction.date
+                )
                 .reduce((acc, transaction) => {
-                    const month = getMonthName(transaction.date);
-                    if (!acc[month]) {
-                        acc[month] = 0;
+                    const monthYear = getMonthYear(transaction.date);
+                    if (!monthYear) return acc; // Skip invalid dates
+                    if (!acc[monthYear]) {
+                        acc[monthYear] = 0;
                     }
-                    acc[month] += transaction.amount;
+                    acc[monthYear] += transaction.amount;
                     return acc;
                 }, {});
 
