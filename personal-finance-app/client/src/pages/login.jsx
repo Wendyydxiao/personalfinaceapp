@@ -82,7 +82,7 @@ const Login = () => {
         >
             <Box w="full" textAlign="center" py={20} color="white">
                 <Heading fontSize="4xl" mb={4}>
-                    Welcome to Your Personal Finance App
+                    Welcome to Spendify!
                 </Heading>
                 <Text fontSize="lg" mb={6}>
                     Track, manage, and optimize your finances effortlessly.
@@ -104,7 +104,7 @@ const Login = () => {
                     w="full"
                     bg="white"
                     p={10}
-                    mt={2}
+                    mt={1}
                     borderRadius="lg"
                     boxShadow="xl"
                     textAlign="center"
@@ -135,10 +135,10 @@ const Login = () => {
                             />
                             <Box>
                                 <Text fontWeight="medium">
-                                    Set and meet goals
+                                    Visualise your spending habits
                                 </Text>
                                 <Text fontSize="sm" color="gray.500">
-                                    Your finances, organized and optimized.
+                                    Manage your finances in an organized and optimized way.
                                 </Text>
                             </Box>
                         </Flex>
