@@ -87,14 +87,20 @@ const Profile = () => {
     };
 
     const handleUpgradeNow = async () => {
-        console.log("API Base URL:", process.env.REACT_APP_API_BASE_URL); // Debugging
+        const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://personalfinaceapp-y9ns.onrender.com";
+        
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/create-checkout-session`);
-            window.location.href = response.data.url;
+            const response = await axios.post(`${API_BASE_URL}/create-checkout-session`);
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            } else {
+                throw new Error("Invalid response from the server");
+            }
         } catch (error) {
+            console.error("Failed to start checkout process:", error);
             toast({
                 title: "Error",
-                description: "Failed to start checkout process.",
+                description: "Failed to start checkout process. Please try again later.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
