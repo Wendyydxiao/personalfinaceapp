@@ -55,47 +55,20 @@ const typeDefs = gql`
         description: String
     }
 
-    input UpdateTransactionInput {
-        id: ID!
-        type: String
-        amount: Float
-        category: String # Accepts the category name
-        date: String
-        description: String
-    }
-
     # Queries for fetching data
     type Query {
-        # Fetch the authenticated user
         getUser: User
-
-        # Fetch all users
-        getAllUsers: [User]
-
-        # Fetch all transactions for the authenticated user
-        getTransactions(userId: ID): [Transaction]
-
-        # Fetch all categories (or filter by type)
-        getCategories(type: String): [Category]
+        getTransactions: [Transaction]
+        getCategories: [Category]
     }
 
     # Mutations for creating, updating, and deleting data
     type Mutation {
-        # User signup and login
         signup(username: String!, email: String!, password: String!): Auth
         login(email: String!, password: String!): Auth
-
-        # Transaction management
         addTransaction(input: TransactionInput!): Transaction
-        updateTransaction(input: UpdateTransactionInput!): Transaction
         deleteTransaction(id: ID!): Transaction
-
-        # Category management
         addCategory(name: String!, type: String!, description: String): Category
-        deleteCategory(id: ID!): Category
-
-        # Password management
-        updatePassword(newPassword: String!): PasswordUpdateResponse
     }
 `;
 

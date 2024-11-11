@@ -13,7 +13,6 @@ import {
     Spinner,
     useToast,
     Text,
-    Icon,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
@@ -21,7 +20,7 @@ import { GET_USER_PROFILE } from "../utils/queries";
 import { UPDATE_PASSWORD } from "../utils/mutations";
 import AuthService from "../utils/auth";
 import axios from "axios";
-import { StarIcon } from "@chakra-ui/icons"; // Star icon for a premium feel
+import { StarIcon } from "@chakra-ui/icons";
 
 const Profile = () => {
     const toast = useToast();
@@ -88,8 +87,9 @@ const Profile = () => {
     };
 
     const handleUpgradeNow = async () => {
+        console.log("API Base URL:", process.env.REACT_APP_API_BASE_URL); // Debugging
         try {
-            const response = await axios.post("http://localhost:4000/create-checkout-session");
+            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/create-checkout-session`);
             window.location.href = response.data.url;
         } catch (error) {
             toast({
@@ -172,7 +172,6 @@ const Profile = () => {
                         Update Password
                     </Button>
 
-                    {/* Distinct Upgrade Now Button */}
                     <Box mt={8} textAlign="center">
                         <Button
                             colorScheme="yellow"

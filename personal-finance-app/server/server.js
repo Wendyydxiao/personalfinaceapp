@@ -9,7 +9,8 @@ const { authMiddleware } = require("./utils/auth");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const cors = require("cors");
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mernAppDB";
+const MONGODB_URI =
+    process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mernAppDB";
 const PORT = process.env.PORT || 4000;
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -38,6 +39,9 @@ if (process.env.NODE_ENV === "production") {
     });
 }
 
+// Log the CLIENT_URL to verify it's set correctly
+console.log("Client URL:", process.env.CLIENT_URL);
+
 // Initialize Apollo Server
 const server = new ApolloServer({
     typeDefs,
@@ -61,9 +65,10 @@ app.post("/create-checkout-session", async (req, res) => {
                 },
             ],
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL || req.headers.origin}/profile`,
-            cancel_url: `${process.env.CLIENT_URL || req.headers.origin}/cancel`,
+            success_url: `${process.env.CLIENT_URL}/profile`,
+            cancel_url: `${process.env.CLIENT_URL}/cancel`,
         });
+
         res.json({ id: session.id, url: session.url }); // Return the full URL
     } catch (error) {
         console.error("Error creating Stripe session:", error.message);
