@@ -9,8 +9,7 @@ const { authMiddleware } = require("./utils/auth");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const cors = require("cors");
 
-const MONGODB_URI =
-    process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mernAppDB";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mernAppDB";
 const PORT = process.env.PORT || 4000;
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -22,20 +21,18 @@ const app = express();
 
 // CORS Configuration
 const corsOptions = {
-    origin:
-        process.env.NODE_ENV === "production"
-            ? process.env.CLIENT_URL || "*"
-            : "*",
+    origin: process.env.CLIENT_URL || "*",
     credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve static assets in production
+// Serve static assets if in production
 if (process.env.NODE_ENV === "production") {
-    const clientBuildPath = path.join(__dirname, "../client/dist");
+    const clientBuildPath = path.join(__dirname, "../client/build");
     app.use(express.static(clientBuildPath));
+
     app.get("*", (req, res) => {
         res.sendFile(path.join(clientBuildPath, "index.html"));
     });
@@ -64,10 +61,10 @@ app.post("/create-checkout-session", async (req, res) => {
                 },
             ],
             mode: "payment",
-            success_url: `${req.headers.origin}/success`,
-            cancel_url: `${req.headers.origin}/cancel`,
+            success_url: `${process.env.CLIENT_URL || req.headers.origin}/profile`,
+            cancel_url: `${process.env.CLIENT_URL || req.headers.origin}/cancel`,
         });
-        res.json({ id: session.id });
+        res.json({ id: session.id, url: session.url }); // Return the full URL
     } catch (error) {
         console.error("Error creating Stripe session:", error.message);
         res.status(500).json({ error: "Failed to create Stripe session" });

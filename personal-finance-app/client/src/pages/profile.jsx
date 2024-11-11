@@ -12,12 +12,16 @@ import {
     AlertIcon,
     Spinner,
     useToast,
+    Text,
+    Icon,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_USER_PROFILE } from "../utils/queries";
 import { UPDATE_PASSWORD } from "../utils/mutations";
 import AuthService from "../utils/auth";
+import axios from "axios";
+import { StarIcon } from "@chakra-ui/icons"; // Star icon for a premium feel
 
 const Profile = () => {
     const toast = useToast();
@@ -28,8 +32,7 @@ const Profile = () => {
         confirmPassword: "",
     });
 
-    const [updatePassword, { loading: updatingPassword }] =
-        useMutation(UPDATE_PASSWORD);
+    const [updatePassword, { loading: updatingPassword }] = useMutation(UPDATE_PASSWORD);
 
     const handlePasswordChange = (e) => {
         const { name, value } = e.target;
@@ -81,7 +84,22 @@ const Profile = () => {
 
     const handleLogout = () => {
         AuthService.logout();
-        window.location.href = "/"; // Redirect to the base URL
+        window.location.href = "/";
+    };
+
+    const handleUpgradeNow = async () => {
+        try {
+            const response = await axios.post("http://localhost:4000/create-checkout-session");
+            window.location.href = response.data.url;
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to start checkout process.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        }
     };
 
     if (loading) return <Spinner size="xl" />;
@@ -96,23 +114,9 @@ const Profile = () => {
     const { username, email } = data.getUser;
 
     return (
-        <Center
-            minH="100vh"
-            bgGradient="linear(to-r, purple.500, blue.500)"
-            p={4}
-        >
-            <Box
-                maxW="lg"
-                w="full"
-                bg="white"
-                p={10}
-                borderRadius="lg"
-                boxShadow="xl"
-                textAlign="center"
-            >
-                <Heading fontSize="2xl" mb={6} color="purple.600">
-                    User Profile
-                </Heading>
+        <Center minH="100vh" bgGradient="linear(to-r, purple.500, blue.500)" p={4}>
+            <Box maxW="lg" w="full" bg="white" p={10} borderRadius="lg" boxShadow="xl" textAlign="center">
+                <Heading fontSize="2xl" mb={6} color="purple.600">User Profile</Heading>
 
                 <VStack spacing={4} align="stretch">
                     <FormControl id="name">
@@ -167,6 +171,25 @@ const Profile = () => {
                     >
                         Update Password
                     </Button>
+
+                    {/* Distinct Upgrade Now Button */}
+                    <Box mt={8} textAlign="center">
+                        <Button
+                            colorScheme="yellow"
+                            width="full"
+                            size="lg"
+                            bgGradient="linear(to-r, orange.300, yellow.400)"
+                            _hover={{ bgGradient: "linear(to-r, orange.400, yellow.500)" }}
+                            boxShadow="lg"
+                            leftIcon={<StarIcon />}
+                            onClick={handleUpgradeNow}
+                        >
+                            <Text fontSize="lg" fontWeight="bold">Upgrade Now - Unlock Premium Features</Text>
+                        </Button>
+                        <Text fontSize="sm" color="gray.500" mt={2}>
+                            Enjoy more insights and personalized tools with premium. Total cost is A$2.88.
+                        </Text>
+                    </Box>
 
                     <Link to="/dashboard">
                         <Button colorScheme="blue" width="full">

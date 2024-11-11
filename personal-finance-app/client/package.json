@@ -18,6 +18,7 @@
     "@emotion/styled": "^11.13.0",
     "@stripe/stripe-js": "^1.54.0",
     "@testing-library/react": "^14.0.0",
+    "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "framer-motion": "^11.11.11",
     "graphql": "^16.6.0",
