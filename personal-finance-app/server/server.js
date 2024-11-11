@@ -30,7 +30,7 @@ app.use(express.json());
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {
-    const clientBuildPath = path.join(__dirname, "../client/build");
+    const clientBuildPath = path.join(__dirname, "../client/dist");
     app.use(express.static(clientBuildPath));
 
     app.get("*", (req, res) => {
