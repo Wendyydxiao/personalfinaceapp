@@ -89,7 +89,7 @@ const Profile = () => {
 
     const handleUpgradeNow = async () => {
         try {
-            const response = await axios.post("http://localhost:4000/create-checkout-session");
+            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/create-checkout-session`);
             window.location.href = response.data.url;
         } catch (error) {
             toast({
@@ -101,6 +101,7 @@ const Profile = () => {
             });
         }
     };
+    
 
     if (loading) return <Spinner size="xl" />;
     if (error)
