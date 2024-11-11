@@ -26,7 +26,8 @@
     "develop": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
     "install": "cd server && npm install && cd ../client && npm install",
     "build": "cd client && npm run build && cd ../server && npm install",
-    "render-build": "npm install && npm run build"
+    "render-build": "npm install && npm run build && cd client && npm install && npm run build"
+
   },
   "eslintConfig": {
     "extends": [
