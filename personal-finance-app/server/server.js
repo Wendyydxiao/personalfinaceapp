@@ -9,7 +9,8 @@ const { authMiddleware } = require("./utils/auth");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const cors = require("cors");
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mernAppDB";
+const MONGODB_URI =
+    process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/mernAppDB";
 const PORT = process.env.PORT || 4000;
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -61,8 +62,12 @@ app.post("/create-checkout-session", async (req, res) => {
                 },
             ],
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL || req.headers.origin}/profile`,
-            cancel_url: `${process.env.CLIENT_URL || req.headers.origin}/cancel`,
+            success_url: `${
+                process.env.CLIENT_URL || req.headers.origin
+            }/profile`,
+            cancel_url: `${
+                process.env.CLIENT_URL || req.headers.origin
+            }/profile`,
         });
         res.json({ id: session.id, url: session.url }); // Return the full URL
     } catch (error) {

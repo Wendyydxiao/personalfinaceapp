@@ -36,13 +36,12 @@ export const ADD_TRANSACTION = gql`
             description
             category {
                 name
-                type
             }
         }
     }
 `;
 
-export const DELETE_ENTRY = gql`
+export const DELETE_TRANSACTION = gql`
     mutation DeleteTransaction($id: ID!) {
         deleteTransaction(id: $id) {
             _id
