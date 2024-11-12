@@ -12,8 +12,6 @@ import {
     Alert,
     AlertIcon,
     useToast,
-    HStack,
-    Text,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
@@ -73,9 +71,8 @@ const Entry = () => {
 
     const [addTransaction] = useMutation(ADD_TRANSACTION);
     const [addCategory] = useMutation(ADD_CATEGORY);
-    const [deleteTransaction] = useMutation(DELETE_ENTRY);
 
-    const toast = useToast();
+    const toast = useToast(); // For displaying success or error messages
 
     useEffect(() => {
         if (categoryData?.getCategories) {
@@ -122,6 +119,7 @@ const Entry = () => {
                 },
             });
 
+            // Reset form after successful entry
             setNewEntry({
                 type: "Expense",
                 category: "",
@@ -132,6 +130,7 @@ const Entry = () => {
 
             refetch();
 
+            // Show success toast
             toast({
                 title: "Transaction Added",
                 description: "Your transaction has been successfully added.",
@@ -141,33 +140,9 @@ const Entry = () => {
             });
         } catch (err) {
             console.error("Error adding transaction:", err.message);
+            // Show error toast
             toast({
                 title: "Error Adding Transaction",
-                description: err.message,
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-        }
-    };
-
-    const handleDeleteEntry = async (id) => {
-        try {
-            await deleteTransaction({
-                variables: { id },
-            });
-            refetch();
-            toast({
-                title: "Transaction Deleted",
-                description: "The transaction has been successfully deleted.",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
-        } catch (err) {
-            console.error("Error deleting transaction:", err.message);
-            toast({
-                title: "Error Deleting Transaction",
                 description: err.message,
                 status: "error",
                 duration: 3000,
@@ -289,48 +264,15 @@ const Entry = () => {
                         Add Entry
                     </Button>
                 </VStack>
-            </Box>
 
-            <Box
-                maxW="lg"
-                w="full"
-                bg="white"
-                p={6}
-                borderRadius="lg"
-                boxShadow="xl"
-                textAlign="center"
-                mx="auto"
-            >
-                <Heading fontSize="2xl" color="purple.600" mb={6}>
-                    Your Transactions
-                </Heading>
-                {data?.getTransactions.map((transaction) => (
-                    <Box
-                        key={transaction.id}
-                        p={4}
-                        borderWidth="1px"
-                        borderRadius="md"
-                        mb={4}
-                        bg="gray.50"
-                    >
-                        <Text fontWeight="bold">
-                            {transaction.type.toUpperCase()} -{" "}
-                            {transaction.category.name}
-                        </Text>
-                        <Text>{transaction.description}</Text>
-                        <Text>${transaction.amount}</Text>
-                        <Text>
-                            {new Date(transaction.date).toLocaleDateString()}
-                        </Text>
-                        <Button
-                            colorScheme="red"
-                            mt={2}
-                            onClick={() => handleDeleteEntry(transaction.id)}
-                        >
-                            Delete
+                {/* Navigation Button */}
+                <Box mt={6}>
+                    <Link to="/dashboard">
+                        <Button colorScheme="teal" width="full">
+                            Back to Dashboard
                         </Button>
-                    </Box>
-                ))}
+                    </Link>
+                </Box>
             </Box>
         </Box>
     );
