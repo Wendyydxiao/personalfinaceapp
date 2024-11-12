@@ -99,27 +99,6 @@ const resolvers = {
 
             return transaction.populate("category");
         },
-        async deleteTransaction(_, { id }, context) {
-            if (!context.user) {
-                throw new AuthenticationError("Not authenticated");
-            }
-
-            const transaction = await Transaction.findById(id);
-            if (!transaction) {
-                throw new Error("Transaction not found");
-            }
-
-            // Ensure the transaction belongs to the logged-in user
-            if (transaction.userId.toString() !== context.user.id) {
-                throw new AuthenticationError(
-                    "Unauthorized to delete this transaction"
-                );
-            }
-
-            await transaction.remove();
-
-            return transaction;
-        },
     },
 };
 

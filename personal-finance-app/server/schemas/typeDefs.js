@@ -67,7 +67,6 @@ const typeDefs = gql`
         signup(username: String!, email: String!, password: String!): Auth
         login(email: String!, password: String!): Auth
         addTransaction(input: TransactionInput!): Transaction
-        deleteTransaction(id: ID!): Transaction
         addCategory(name: String!, type: String!, description: String): Category
     }
 `;

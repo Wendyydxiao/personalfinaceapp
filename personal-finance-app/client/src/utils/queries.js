@@ -42,14 +42,6 @@ export const ADD_TRANSACTION = gql`
     }
 `;
 
-export const DELETE_ENTRY = gql`
-    mutation DeleteTransaction($id: ID!) {
-        deleteTransaction(id: $id) {
-            _id
-        }
-    }
-`;
-
 export const ADD_CATEGORY = gql`
     mutation AddCategory($name: String!, $type: String!, $description: String) {
         addCategory(name: $name, type: $type, description: $description) {
