@@ -31,7 +31,8 @@ const Profile = () => {
         confirmPassword: "",
     });
 
-    const [updatePassword, { loading: updatingPassword }] = useMutation(UPDATE_PASSWORD);
+    const [updatePassword, { loading: updatingPassword }] =
+        useMutation(UPDATE_PASSWORD);
 
     const handlePasswordChange = (e) => {
         const { name, value } = e.target;
@@ -87,14 +88,25 @@ const Profile = () => {
     };
 
     const handleUpgradeNow = async () => {
-        console.log("API Base URL:", process.env.REACT_APP_API_BASE_URL); // Debugging
+        const API_BASE_URL =
+            process.env.REACT_APP_API_BASE_URL ||
+            "https://personalfinaceapp-y9ns.onrender.com";
+
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/create-checkout-session`);
-            window.location.href = response.data.url;
+            const response = await axios.post(
+                `${API_BASE_URL}/create-checkout-session`
+            );
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            } else {
+                throw new Error("Invalid response from the server");
+            }
         } catch (error) {
+            console.error("Failed to start checkout process:", error);
             toast({
                 title: "Error",
-                description: "Failed to start checkout process.",
+                description:
+                    "Failed to start checkout process. Please try again later.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -114,9 +126,23 @@ const Profile = () => {
     const { username, email } = data.getUser;
 
     return (
-        <Center minH="100vh" bgGradient="linear(to-r, purple.500, blue.500)" p={4}>
-            <Box maxW="lg" w="full" bg="white" p={10} borderRadius="lg" boxShadow="xl" textAlign="center">
-                <Heading fontSize="2xl" mb={6} color="purple.600">User Profile</Heading>
+        <Center
+            minH="100vh"
+            bgGradient="linear(to-r, purple.500, blue.500)"
+            p={4}
+        >
+            <Box
+                maxW="lg"
+                w="full"
+                bg="white"
+                p={10}
+                borderRadius="lg"
+                boxShadow="xl"
+                textAlign="center"
+            >
+                <Heading fontSize="2xl" mb={6} color="purple.600">
+                    User Profile
+                </Heading>
 
                 <VStack spacing={4} align="stretch">
                     <FormControl id="name">
@@ -178,15 +204,21 @@ const Profile = () => {
                             width="full"
                             size="lg"
                             bgGradient="linear(to-r, orange.300, yellow.400)"
-                            _hover={{ bgGradient: "linear(to-r, orange.400, yellow.500)" }}
+                            _hover={{
+                                bgGradient:
+                                    "linear(to-r, orange.400, yellow.500)",
+                            }}
                             boxShadow="lg"
                             leftIcon={<StarIcon />}
                             onClick={handleUpgradeNow}
                         >
-                            <Text fontSize="lg" fontWeight="bold">Upgrade Now - Unlock Premium Features</Text>
+                            <Text fontSize="lg" fontWeight="bold">
+                                Upgrade Now - Unlock Premium Features
+                            </Text>
                         </Button>
                         <Text fontSize="sm" color="gray.500" mt={2}>
-                            Enjoy more insights and personalized tools with premium. Total cost is A$2.88.
+                            Enjoy more insights and personalized tools with
+                            premium. Total cost is A$2.88.
                         </Text>
                     </Box>
 
