@@ -18,11 +18,7 @@ import {
 import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_CATEGORIES, GET_USER_ENTRIES } from "../utils/queries";
-import {
-    ADD_TRANSACTION,
-    ADD_CATEGORY,
-    DELETE_ENTRY,
-} from "../utils/mutations";
+import { ADD_TRANSACTION, ADD_CATEGORY } from "../utils/mutations";
 
 const DEFAULT_CATEGORIES = {
     income: [
