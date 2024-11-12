@@ -12,17 +12,12 @@ import {
     Alert,
     AlertIcon,
     useToast,
-    HStack,
     Text,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_CATEGORIES, GET_USER_ENTRIES } from "../utils/queries";
-import {
-    ADD_TRANSACTION,
-    ADD_CATEGORY,
-    DELETE_ENTRY,
-} from "../utils/mutations";
+import { ADD_TRANSACTION, ADD_CATEGORY } from "../utils/mutations";
 
 const DEFAULT_CATEGORIES = {
     income: [
@@ -77,7 +72,6 @@ const Entry = () => {
 
     const [addTransaction] = useMutation(ADD_TRANSACTION);
     const [addCategory] = useMutation(ADD_CATEGORY);
-    const [deleteTransaction] = useMutation(DELETE_ENTRY);
 
     const toast = useToast();
 
@@ -147,31 +141,6 @@ const Entry = () => {
             console.error("Error adding transaction:", err.message);
             toast({
                 title: "Error Adding Transaction",
-                description: err.message,
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-        }
-    };
-
-    const handleDeleteEntry = async (id) => {
-        try {
-            await deleteTransaction({
-                variables: { id },
-            });
-            refetch();
-            toast({
-                title: "Transaction Deleted",
-                description: "The transaction has been successfully deleted.",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
-        } catch (err) {
-            console.error("Error deleting transaction:", err.message);
-            toast({
-                title: "Error Deleting Transaction",
                 description: err.message,
                 status: "error",
                 duration: 3000,
@@ -304,6 +273,24 @@ const Entry = () => {
                 boxShadow="xl"
                 textAlign="center"
                 mx="auto"
+                mb={6}
+            >
+                <Link to="/dashboard">
+                    <Button colorScheme="blue" width="full">
+                        Go to Dashboard
+                    </Button>
+                </Link>
+            </Box>
+
+            <Box
+                maxW="lg"
+                w="full"
+                bg="white"
+                p={6}
+                borderRadius="lg"
+                boxShadow="xl"
+                textAlign="center"
+                mx="auto"
             >
                 <Heading fontSize="2xl" color="purple.600" mb={6}>
                     Your Transactions
@@ -326,13 +313,6 @@ const Entry = () => {
                         <Text>
                             {new Date(transaction.date).toLocaleDateString()}
                         </Text>
-                        <Button
-                            colorScheme="red"
-                            mt={2}
-                            onClick={() => handleDeleteEntry(transaction.id)}
-                        >
-                            Delete
-                        </Button>
                     </Box>
                 ))}
             </Box>
